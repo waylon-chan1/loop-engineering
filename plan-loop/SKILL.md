@@ -61,6 +61,7 @@ Explore for reuse before designing anything new: existing operations, models, he
 
 - `## Shape` — where the pieces go and why, in the repo's own idiom.
 - `## Build list` — ordered tasks, each with `Files:` (exact paths), `Specs:` (the examples to write, stated as behavior invariants — names and assertions, not code), `Verify:` (the exact focused command that proves this task), and `Criteria:` (which acceptance criteria this task serves).
+- `## Companion repos` — only if the behavior genuinely spans repositories (`{companion_repos}` names the candidates). Per repo: which one, why it must change, the specific planned change, which criteria it serves, and the **deploy order** with what happens if only one side ships. Investigate those repos read-only while writing this — never assert what a client sends or a service returns without having looked. Omit the section entirely when the work is single-repo; inventing a companion change is the cross-repo form of overengineering, and it doubles the blast radius while doing it.
 - `## Failure Modes` — table: Failure | Handling | Test. This is the regression contract verify will hold.
 - `## Rollout` — only when deploy order, flags, or data changes make it non-trivial.
 
@@ -68,6 +69,7 @@ Explore for reuse before designing anything new: existing operations, models, he
 
 - Every build task cites ≥1 criterion. A task no criterion demands is the overengineering vector — cut it or take it to the user as a proposed criterion change.
 - Every criterion is covered by ≥1 task and ≥1 planned spec, or is explicitly `[manual]`/`[user]`-only with the reason stated.
+- Every companion repo listed is demanded by ≥1 criterion, and every cross-repo criterion names the repo that satisfies it. Gate 2 is where the user authorizes writing to another repository — say so explicitly when presenting, since it is the largest scope decision in the plan.
 
 ### 2d. Gate 2
 

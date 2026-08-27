@@ -26,6 +26,7 @@ Section ownership and mutability:
 | `## Shape`, `## Build list`, `## Failure Modes` | plan Stage B | build checks boxes; dated banners for structural change |
 | `## Deviations` — dated, classed | build | append-only |
 | `## Chain log` — one line per handoff | every skill that spawns a successor | append-only |
+| `## Companion repos` — repo, why, planned change, criteria served, deploy order | plan-loop Stage B (Stage A if criteria span repos) | gated at gate 2; a repo not listed here may not be written to |
 | `## Verification evidence` — verdict + evidence per criterion | verify | verify only |
 
 **Frozen is a checkable property, not an honor rule.** Frozen sections change only by appending a dated supersession banner (`> **YYYY-MM-DD revision:** …`) above the superseded text, never by in-place rewrites — and criteria banners additionally require the user's explicit approval. `verify` diffs the criteria section against the document's state at the gate-1 approval commit; any unbannered change is a headline finding.
@@ -75,6 +76,27 @@ The **autonomous segment** is therefore gate 2 → merge-ready: `build → {diff
 **Freshness holds by construction.** Every verify is a newly spawned agent that has not seen build's transcript. No skill may ever verify work it performed — spawning satisfies this automatically, which is why verify is never invoked inline by build.
 
 **Runaway control.** Each skill spawns **at most one** successor. Every hop appends a line to `## Chain log` in the plan document: timestamp, from → to, and why. A skill whose hop would push the log past **12 entries** stops and reports instead. A lifecycle that has taken twelve hops is malfunctioning, not working hard.
+
+## Cross-repository work
+
+A task's behavior often spans repositories — a backend contract its client consumes, a service its caller depends on. The lifecycle handles this with **repo-scoped leaf agents**, under one governing distinction:
+
+**Reading another repo is always allowed. Writing to one must be planned and gated.**
+
+- **Read-only investigation** — any stage, any repo, no ceremony. Verifying what a client actually sends, what a service actually returns, or whether a dependency's `origin/main` really contains the change you're told it does. Confirm merges by querying the forge (`gh pr view <n> --repo <org>/<repo> --json state,mergedAt`); a file existing locally proves nothing about what shipped.
+- **Writing** — a companion repo may be modified only if it is named in the plan document's `## Companion repos` section and approved at gate 2. A change discovered mid-build in a repo nobody approved is `scope-declined`, exactly as it would be in the working repo. This is the same boundary as always; the blast radius is simply larger, because a companion repo's diff was never in the user's approved scope unless they put it there.
+
+**Companion agents are leaf workers.** Build spawns one agent per planned companion repo. Each resolves **that repo's own adapter** (LIFECYCLE.md § The adapter — bootstrap it if absent; an adapter written by a session working in that repo is authoritative over your inference), performs only the change the plan names, runs that repo's tests with that repo's commands, and reports back. A leaf agent **never chains** — it spawns no successor and starts no lifecycle of its own. That is what keeps fan-out bounded: the one-successor rule governs the chain, and leaves are not links in it.
+
+**Preconditions before touching any companion repo, checked in order:**
+
+1. **Its working tree must be clean and on its default branch.** A dirty tree means a human or another agent is working there — stop and report; never stash, reset, or build on top of someone's uncommitted work.
+2. Create a fresh branch for the change. Never commit to the default branch.
+3. Never reuse another workspace's checkout of that repo. Use the plain clone or your own worktree.
+
+**One PR per repository**, each standing on its own. Record **deploy order** in the plan doc — producer before consumer, and state what happens if only one side ships, because in practice one side always ships first. The human merges each; the chain stops at merge-ready in every repo, not just the working one.
+
+**Don't import the other repo's story.** Keep this repo's contract in this repo's documents, link the authoritative source, and verify its current state rather than restating what it looked like when you read it.
 
 ## Gates
 
@@ -128,6 +150,7 @@ The four skills carry zero repository facts. Every repo-specific value is an **a
 | `{review_skill}` | The PR-comment adjudication skill (if the repo has one) |
 | `{tracker_location}` | Where the lesson tracker lives |
 | `{invariants}` | Facts that must never be re-derived wrong |
+| `{companion_repos}` | Repositories this one's behavior spans: local clone path, forge slug, the relationship (who produces, who consumes), and the usual deploy order |
 
 **Resolution order:** (1) `.claude/lifecycle-context.md` in the repo, if present; (2) `~/.claude/skills/lifecycle/contexts/<repo>.md`, where `<repo>` is the basename of `git remote get-url origin`; (3) neither → run the bootstrap: infer candidates from the repo (README, CI config, `bin/`, `package.json`/`Gemfile`, AGENTS.md/CLAUDE.md), confirm them with the user, write the context file to location (2) for next time.
 

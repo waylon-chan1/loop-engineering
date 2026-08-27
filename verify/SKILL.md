@@ -26,6 +26,8 @@ Diff the `## Acceptance criteria` section against its state at the gate-1 approv
 - **`[manual]`** — boot `{run_server}`; put the system into the needed state with `{mint_test_state}` (cold start via `{manual_probe}` if the repo has no minting tool); exercise the flow through `{manual_probe}`; observe the criterion with your own eyes. Record the exact requests/commands and observed responses into `## Verification evidence` — reproducible, so a skeptic can replay them.
 - **`[user]`** — verdict is **USER** with the specific question the human must answer (what to look at, what "good" looks like). Never PASS on the human's behalf; a green-looking report with a human-owed item buried in it is this skill's canonical failure.
 
+**Cross-repo criteria:** when the plan has `## Companion repos`, a criterion that spans repositories is discharged at the **boundary** — run the companion repo's relevant tests yourself (its adapter names the commands) and exercise the contract both sides depend on, rather than accepting either side's claim about the other. Confirm any dependency you were told already shipped by querying the forge, not by finding a file locally. State the deploy order's consequence explicitly: if only one side ships first, does the system stay correct? An unanswered version of that question is a FAIL, not a footnote.
+
 **Regression:** the full suite already ran above; additionally spot-check the plan's `## Failure Modes` table — each row's Test must exist and pass — and probe the nearest untouched behavior adjacent to the change.
 
 ## 3. Verdicts

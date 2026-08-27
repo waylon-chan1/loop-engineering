@@ -34,6 +34,16 @@ Task by task, in build-list order:
 
 After the last task: run `{regen_artifacts}` for any behavior change, then `{ci_command}` (or `{test_command}` + `{lint_command}`). Red anything → fix before proceeding; build never hands a red tree forward.
 
+## 2b. Companion repositories
+
+If the plan has a `## Companion repos` section, spawn **one leaf agent per repo** after the working repo's tasks are green (or earlier if the plan's deploy order requires the companion to lead). Each leaf agent is told: the target repo's clone path, the specific planned change, the criteria it serves, and that it must resolve **that repo's own adapter** — an existing adapter written by a session that works in that repo outranks your inference about it; bootstrap one only if none exists.
+
+Every leaf agent, in order: confirm the target tree is **clean and on its default branch** (dirty → stop and report; never stash or reset over someone's uncommitted work), branch, make only the planned change, write and run tests with that repo's commands, open a PR in that repo, and return a report. It spawns nothing further — leaf agents never chain.
+
+Read-only investigation of any repo needs no plan entry and no ceremony. **Writing to a repo the plan doesn't name is `scope-declined`**, exactly as in the working repo — a companion diff nobody approved is scope creep with a wider blast radius.
+
+Record each companion PR and its deploy-order position in the plan doc.
+
 ## 3. Deviation protocol — ordered, checked at every divergence
 
 The split: **structure needs the user; implementation belongs to the agent.**
