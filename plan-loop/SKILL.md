@@ -1,9 +1,11 @@
 ---
-name: plan
+name: plan-loop
 description: Frame a task into a plan document with concrete, testable acceptance criteria (Stage A), then scope the implementation against the codebase (Stage B) — two individually human-gated stages that produce the frozen contract build and verify run against. Use when starting a new feature, bug fix, or task in the loop-engineering lifecycle, or to resume a task whose plan doc Status is planning or criteria-approved.
 ---
 
-# plan — frame the task, then scope the implementation
+# plan-loop — frame the task, then scope the implementation
+
+(The skill is named `plan-loop` to avoid colliding with built-in plan mode; the lifecycle *stage* it owns is still called `plan` — tracker rows and miss attribution use the stage name.)
 
 Shared contract: `~/.claude/skills/lifecycle/LIFECYCLE.md` (the artifact, status machine, gates, adapter). Read it first, resolve the adapter, and read `{conventions_files}` before anything below.
 

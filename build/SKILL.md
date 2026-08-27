@@ -7,7 +7,7 @@ description: Implement an approved plan document test-first — scaffold the fai
 
 Shared contract: `~/.claude/skills/lifecycle/LIFECYCLE.md`. Resolve the adapter and read `{conventions_files}` first.
 
-Build's job is fidelity: carry out the approved build list exactly, prove each step with a spec that existed and failed before the implementation did, and make every divergence from the plan loud. Build does not design. The thinking happened in `plan`; re-opening it mid-implementation is how scope creep and hallucinated features happen — that's what the deviation protocol is for.
+Build's job is fidelity: carry out the approved build list exactly, prove each step with a spec that existed and failed before the implementation did, and make every divergence from the plan loud. Build does not design. The thinking happened in `plan-loop`; re-opening it mid-implementation is how scope creep and hallucinated features happen — that's what the deviation protocol is for.
 
 ## 0. Preconditions
 

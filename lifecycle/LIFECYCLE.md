@@ -1,9 +1,9 @@
 # LIFECYCLE.md — shared contract for the loop-engineering skills
 
-The `plan`, `build`, `verify`, and `retro` skills implement one development lifecycle:
+The `plan-loop`, `build`, `verify`, and `retro` skills implement one development lifecycle (the `plan-loop` skill owns the stage named `plan` — the skill name avoids colliding with built-in plan mode):
 
 ```
-plan Stage A ── gate 1 ──▶ plan Stage B ── gate 2 ──▶ build ──▶ diff audit ──▶ verify ──▶ PR ──▶ review ──▶ merge ──▶ retro
+plan-loop A ── gate 1 ──▶ plan-loop B ── gate 2 ──▶ build ──▶ diff audit ──▶ verify ──▶ PR ──▶ review ──▶ merge ──▶ retro
    (criteria)                (build plan)              (TDD)     ({diff_audit_    (fresh                 ({review_
                                                                     skill})         eyes)                   skill})
 ```
@@ -12,7 +12,7 @@ This file is the contract those skills share: the artifact, the status machine, 
 
 ## The artifact
 
-One plan document per task, created by `plan` Stage A, committed to the repo, riding in the PR. Location and filename come from the adapter (`{artifact_dir}`, `{artifact_naming}`). The document is the lifecycle's entire cross-session state — any skill can resume from it in a fresh session by reading the Status line.
+One plan document per task, created by `plan-loop` Stage A, committed to the repo, riding in the PR. Location and filename come from the adapter (`{artifact_dir}`, `{artifact_naming}`). The document is the lifecycle's entire cross-session state — any skill can resume from it in a fresh session by reading the Status line.
 
 Section ownership and mutability:
 
@@ -29,31 +29,32 @@ Section ownership and mutability:
 
 **Frozen is a checkable property, not an honor rule.** Frozen sections change only by appending a dated supersession banner (`> **YYYY-MM-DD revision:** …`) above the superseded text, never by in-place rewrites — and criteria banners additionally require the user's explicit approval. `verify` diffs the criteria section against the document's state at the gate-1 approval commit; any unbannered change is a headline finding.
 
-**Small mode.** A contained bugfix gets Problem, Acceptance criteria, Build list, and Failure Modes only. Same gates, same freeze, less paper. `plan` decides the mode and says so; the user can override at gate 1.
+**Small mode.** A contained bugfix gets Problem, Acceptance criteria, Build list, and Failure Modes only. Same gates, same freeze, less paper. `plan-loop` decides the mode and says so; the user can override at gate 1.
 
 ## Status machine
 
-`planning → criteria-approved → plan-approved → building → built → verified-local → merged` (any state may move to `abandoned`).
+`planning → criteria-approved → plan-approved → building → built → verified-local → merged → closed` (any state may move to `abandoned`).
 
 Each skill refuses to start from the wrong status and says which command the task actually needs:
 
 | Status | Only valid next actor |
 |---|---|
-| `planning` | `plan` (Stage A, toward gate 1) |
-| `criteria-approved` | `plan` (Stage B, toward gate 2) |
+| `planning` | `plan-loop` (Stage A, toward gate 1) |
+| `criteria-approved` | `plan-loop` (Stage B, toward gate 2) |
 | `plan-approved` | `build` |
 | `building` | `build` (resume) |
 | `built` | diff audit, then `verify` |
 | `verified-local` | open the PR; then the review skill |
-| `merged` | `retro` |
+| `merged` | `retro` (sets `closed` when done — this is what makes the autonomous sweep idempotent) |
+| `closed` | nothing — the task is complete |
 
 Every skill ends its report by naming the exact next command. The status line — not any session's memory — is the orchestrator.
 
 ## Gates
 
-**Gate 1 — criteria.** The user approves the acceptance criteria. Before presenting, `plan` audits every criterion: falsifiable (someone could watch it fail), observable from outside the implementation, method-tagged (`[spec]` / `[manual]` / `[user]`), and traced to a decision or failure mode. Unresolved open questions block the gate.
+**Gate 1 — criteria.** The user approves the acceptance criteria. Before presenting, `plan-loop` audits every criterion: falsifiable (someone could watch it fail), observable from outside the implementation, method-tagged (`[spec]` / `[manual]` / `[user]`), and traced to a decision or failure mode. Unresolved open questions block the gate.
 
-**Gate 2 — build plan.** The user approves the shape and build list. Before presenting, `plan` runs the traceability check both ways: every task cites ≥1 criterion; every criterion is covered by ≥1 task (or is explicitly `[user]`/`[manual]`-only with a stated reason).
+**Gate 2 — build plan.** The user approves the shape and build list. Before presenting, `plan-loop` runs the traceability check both ways: every task cites ≥1 criterion; every criterion is covered by ≥1 task (or is explicitly `[user]`/`[manual]`-only with a stated reason).
 
 A gate is passed only by the user saying so in their own words. A skill never infers approval from silence, from time passing, or from its own confidence. This is the hard boundary that makes the rest safe to run autonomously.
 
@@ -125,3 +126,5 @@ The improvement loop, in order. This is a procedure, not advice:
 5. **Version every change.** `~/.claude/skills` is a git repository: one commit per iteration, message citing the tracker row. A dated entry also goes to the stage's Iteration Log with what happened → what changed → row link. Mark the row `graduated`.
 6. **The next real task is the test.** No synthetic validation of rule changes. If an edit was wrong, it produces new friction rows and gets reverted — that's what the git history is for.
 7. **Dead-rule audit, occasionally.** A rule that has never fired across many runs is a deletion candidate. Skills must not monotonically bloat; every rule is either earning catches or on notice.
+
+**Autonomy and its boundary.** The improvement loop runs itself: retro applies qualifying graduations directly — edit, commit, Iteration Log entry — and reports what changed after the fact rather than asking permission. A scheduled sweep invokes retro over any `merged`-but-not-`closed` plan docs and runs the dead-rule audit, so improvement never depends on someone remembering to ask for it. The boundary, which outranks every autonomy grant above: **the system may not autonomously weaken its own human controls.** Any edit touching gate definitions or approval requirements, the criteria freeze, the lesson qualification bar, the deviation classes that route to the user, or this boundary itself is *proposed* to the user and applied only on their approval. Relaxing a rule elsewhere (one that demonstrably produces noise) is allowed, but must cite dead-rule or went-well evidence — never convenience. The reason this line exists: a self-improving system's most likely catastrophic "improvement" is optimizing away the oversight that makes its mistakes recoverable.

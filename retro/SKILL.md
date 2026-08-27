@@ -11,7 +11,8 @@ Retro is the mechanism that makes this a *loop*: it converts what actually happe
 
 ## 0. Preconditions
 
-- Plan doc Status `merged` (or invoked as a periodic sweep across recently-merged tasks). Wrong status → name the correct command and stop.
+- Plan doc Status `merged` (or invoked in sweep mode, below). Wrong status → name the correct command and stop.
+- **Sweep mode** (the autonomous entry point, run on a schedule): pull the repo's default branch, list plan docs in `{artifact_dir}` with Status `merged`, run this skill per doc, then the dead-rule audit. Setting `closed` at the end of each doc (step 5a) is what makes the sweep idempotent — a doc is never harvested twice.
 - Inputs to gather: the review skill's adjudication tally (finding → verdict → reason), the PR's thread history and commits, verify's report (FAILs, USER outcomes, tamper findings), the plan doc's `## Deviations`, and any human overrides during the run.
 
 ## 1. Qualify candidates — the bar, in full
@@ -45,13 +46,20 @@ At `{tracker_location}`: **dedupe first** — a recurring lesson bumps `Times Se
 Threshold: **Times Seen ≥ 3, or one severe miss** (shipped defect, bypassed gate). Then, per LIFECYCLE.md § Iterating:
 
 1. Decide the layer: repo fact → the adapter file; process flaw → the owning skill or LIFECYCLE.md.
-2. Make the **smallest edit that would have prevented the miss**. Skill edits happen between runs, never mid-run, and must cite the tracker rows demanding them — the same evidence rule the skills enforce on code.
-3. Commit in `~/.claude/skills` (it is a git repo), message citing the tracker row.
-4. Dated entry in the stage's Iteration Log: what happened → what changed → row link. Mark the row `graduated`.
+2. **Contradiction check.** Before applying, test the lesson against what already stands: does it contradict an existing skill rule, `{conventions_files}`, or `{invariants}`? A contradiction is not a tiebreaker in the lesson's favor — it means either the rule is wrong or the feedback was bad, and that call goes to the user with both sides' evidence. Bad feedback that slipped past the qualification bar gets caught here, before it can rewrite a rule that was right.
+3. Make the **smallest edit that would have prevented the miss**. Skill edits happen between runs, never mid-run, and must cite the tracker rows demanding them — the same evidence rule the skills enforce on code.
+4. Commit in `~/.claude/skills` (it is a git repo), message citing the tracker row.
+5. Dated entry in the stage's Iteration Log: what happened → what changed → row link. Mark the row `graduated`.
 
-While the skills are user-level, graduation edits them directly. Once a skill has moved into a repo, graduation goes through that repo's normal PR flow.
+While the skills are user-level, graduation edits them directly — apply, commit, log, then **report what changed after the fact; don't ask permission first.** Once a skill has moved into a repo, graduation goes through that repo's normal PR flow.
 
-## 5. Dead-rule audit (periodic sweeps only)
+**The autonomy boundary (LIFECYCLE.md § Iterating — it outranks the autonomy above):** never autonomously edit gate definitions or approval requirements, the criteria freeze, the lesson qualification bar, the deviation classes that route to the user, or the boundary itself. Those changes are *proposed* to the user with the evidence, and applied only on approval. A self-improving system must not be able to optimize away its own oversight.
+
+## 5a. Close the task
+
+Set the plan doc's Status → `closed` (commit the doc change through the repo's normal flow). `closed` is the terminal state; it marks the doc as harvested.
+
+## 5b. Dead-rule audit (sweep mode only)
 
 Any rule with no associated catch across many runs is a deletion candidate — propose the cut with the evidence of silence. Skills must not monotonically bloat; every rule is either earning catches or on notice.
 
