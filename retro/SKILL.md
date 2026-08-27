@@ -55,9 +55,11 @@ While the skills are user-level, graduation edits them directly — apply, commi
 
 **The autonomy boundary (LIFECYCLE.md § Iterating — it outranks the autonomy above):** never autonomously edit gate definitions or approval requirements, the criteria freeze, the lesson qualification bar, the deviation classes that route to the user, or the boundary itself. Those changes are *proposed* to the user with the evidence, and applied only on approval. A self-improving system must not be able to optimize away its own oversight.
 
-## 5a. Close the task
+## 5a. Close the task and end the chain
 
 Set the plan doc's Status → `closed` (commit the doc change through the repo's normal flow). `closed` is the terminal state; it marks the doc as harvested.
+
+Retro spawns **no successor** — it is the end of the lifecycle. In sweep mode it iterates the remaining docs itself rather than chaining, so a backlog of merged tasks can never fan out into a swarm.
 
 ## 5b. Dead-rule audit (sweep mode only)
 

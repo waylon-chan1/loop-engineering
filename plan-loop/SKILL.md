@@ -71,7 +71,13 @@ Explore for reuse before designing anything new: existing operations, models, he
 
 ### 2d. Gate 2
 
-Present shape + build list, **stop — end the turn**. On approval: Status `plan-approved`, commit. Report ends by naming the next command: run the build skill.
+Present shape + build list, **stop — end the turn**. On approval: Status `plan-approved`, commit.
+
+### 2e. Handoff (unless invoked `no-chain`)
+
+Gate 2 approval opens the autonomous segment (LIFECYCLE.md § Chaining). Append a `## Chain log` line and spawn **one** subagent to run the build skill, passing only the plan document's path and the instruction to build it. Do not pass your exploration notes or conclusions — anything build needs belongs in the document, and discovering that it isn't there is a finding, not an inconvenience.
+
+Gate 1 never chains: Stage A ends by stopping for the user, full stop.
 
 ## Hard rules
 

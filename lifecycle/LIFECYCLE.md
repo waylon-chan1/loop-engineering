@@ -25,6 +25,7 @@ Section ownership and mutability:
 | `## NOT in scope` — with routing for anything real | plan Stage A | append-only |
 | `## Shape`, `## Build list`, `## Failure Modes` | plan Stage B | build checks boxes; dated banners for structural change |
 | `## Deviations` — dated, classed | build | append-only |
+| `## Chain log` — one line per handoff | every skill that spawns a successor | append-only |
 | `## Verification evidence` — verdict + evidence per criterion | verify | verify only |
 
 **Frozen is a checkable property, not an honor rule.** Frozen sections change only by appending a dated supersession banner (`> **YYYY-MM-DD revision:** …`) above the superseded text, never by in-place rewrites — and criteria banners additionally require the user's explicit approval. `verify` diffs the criteria section against the document's state at the gate-1 approval commit; any unbannered change is a headline finding.
@@ -49,6 +50,31 @@ Each skill refuses to start from the wrong status and says which command the tas
 | `closed` | nothing — the task is complete |
 
 Every skill ends its report by naming the exact next command. The status line — not any session's memory — is the orchestrator.
+
+## Chaining
+
+Each skill ends by **spawning the next actor as a subagent**, so an approved task runs to completion without further prompting. Chaining is on by default; an invocation carrying `no-chain` performs its own stage and stops.
+
+The chain is driven by the artifact, never by a parent's memory. A spawned agent receives exactly two things: the plan document's path and its own stage instruction. It reads Status itself and refuses if Status doesn't match its stage. Two consequences worth stating: a chain killed mid-flight (closed session, crash, `no-chain`) is always resumable by invoking the right skill by hand, and no agent inherits an upstream agent's conclusions — only the written record they were required to leave behind.
+
+**Stop points. The chain never crosses these:**
+
+| Stops after | Because |
+|---|---|
+| plan-loop Stage A | Gate 1 — only the user approves criteria |
+| plan-loop Stage B | Gate 2 — only the user approves the build plan |
+| a `plan-error` deviation in build | the approved plan is void; only the user can re-authorize |
+| verify FAIL past the repair cap | repeated failure means the plan or the criteria are wrong, not the code |
+| any verify USER verdict | only a human can discharge it |
+| a PR that is ready to merge | merging is outward-facing and needs review approval; the human merges |
+
+The **autonomous segment** is therefore gate 2 → merge-ready: `build → {diff_audit_skill} → verify → (bounded repair) → open PR → {review_skill}`. Everything outside it is gated on purpose.
+
+**Bounded repair loop.** A verify FAIL spawns a build agent to fix **only the failing criteria**, which spawns a **new** verify agent — never the one that graded, and never one that has seen the repair. Cap: **2 repair rounds**. A third failure against the same criterion stops the chain and raises to the user, because by then the evidence points at a wrong criterion or a wrong plan, and further attempts only burn deeper into a wrong path. Every round appends to the chain log.
+
+**Freshness holds by construction.** Every verify is a newly spawned agent that has not seen build's transcript. No skill may ever verify work it performed — spawning satisfies this automatically, which is why verify is never invoked inline by build.
+
+**Runaway control.** Each skill spawns **at most one** successor. Every hop appends a line to `## Chain log` in the plan document: timestamp, from → to, and why. A skill whose hop would push the log past **12 entries** stops and reports instead. A lifecycle that has taken twelve hops is malfunctioning, not working hard.
 
 ## Gates
 

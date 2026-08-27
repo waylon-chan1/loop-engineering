@@ -12,7 +12,8 @@ Verify exists because build cannot grade itself: the context that wrote the code
 ## 0. Preconditions
 
 - Plan doc Status must be `built` (run after the diff audit, since that mutates the diff — adjudicate what will actually ship). Wrong status → name the correct command and stop.
-- Fresh context confirmed: if you implemented this task in this session, spawn a fresh subagent for the adjudication or instruct the user to run verify in a new session. Do not proceed as your own grader.
+- Fresh context confirmed: if you implemented this task in this session, spawn a fresh subagent for the adjudication or instruct the user to run verify in a new session. Do not proceed as your own grader. (In a chained run this holds automatically — verify always arrives as a newly spawned agent.)
+- Read `## Chain log` to learn which repair round this is, if any.
 - `{workspace_bootstrap}` if needed.
 
 ## 1. Tamper check
@@ -35,10 +36,13 @@ Diff the `## Acceptance criteria` section against its state at the gate-1 approv
 - BLOCKED names precisely what's missing (environment, credentials, data) and what would unblock it.
 - Any FAIL or USER verdict is the **first line of the report**, never buried below the passes.
 
-## 4. Route the outcome
+## 4. Route the outcome (the chain's branch point)
 
-- All PASS (+ USER items surfaced): Status → `verified-local`. Next command: open the PR; then the review stage (`{review_skill}` if the repo has one).
-- Any FAIL: Status stays `built`. Hand the failing criteria back to build with the evidence attached. Verify never fixes code — not even the one-liner.
+Unless invoked `no-chain`, append a `## Chain log` line and spawn **one** successor per the outcome:
+
+- **All PASS, no USER items** → Status `verified-local`; spawn an agent to open the PR and run `{review_skill}`. That agent stops when the PR is merge-ready — merging is the human's.
+- **Any FAIL** (within the 2-round repair cap) → Status stays `built`; spawn a build agent in repair mode with the failing criteria and their evidence attached. Verify never fixes code — not even the one-liner; grading and repairing in one context is the failure this skill exists to prevent.
+- **FAIL past the repair cap, or any USER verdict, or a tamper finding** → no successor. Stop and report to the user. Three failures against one criterion is evidence about the criterion, not about the code; a USER item is by definition not yours to discharge.
 
 ## Hard rules
 

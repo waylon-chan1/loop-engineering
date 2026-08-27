@@ -44,10 +44,16 @@ The split: **structure needs the user; implementation belongs to the agent.**
 
 No silent deviations. An empty `## Deviations` section is a claim that the plan held exactly — make it true or make it noisy.
 
-## 4. Wrap
+## 4. Wrap and hand off
 
 - Update Status → `built`. Commit with the repo's commit conventions.
-- Report: per-task verdicts, deviation log summary, spec suite delta (examples added, red→green), CI result, anything routed out of scope — and the exact next commands: the diff audit (`{diff_audit_skill}` if the repo has one), then verify.
+- Report: per-task verdicts, deviation log summary, spec suite delta (examples added, red→green), CI result, anything routed out of scope.
+- **Handoff** (unless invoked `no-chain`): append a `## Chain log` line and spawn **one** subagent to run `{diff_audit_skill}` on the diff and then hand off to verify. Pass only the plan document path. **Never invoke verify inline** — a context that implemented cannot grade its own work, and spawning is what preserves that separation.
+- A `plan-error` STOP does not hand off. The approved plan is void; the chain ends and the user decides.
+
+## 4b. Repair mode
+
+When spawned by verify with failing criteria: fix **only** those criteria, using the evidence verify attached. Do not re-litigate the verdict, do not refactor adjacent code, do not touch passing criteria. Log each repair in `## Deviations`, then hand off to a **new** verify agent (never the one that graded you). The repair cap is 2 rounds — on a third failure of the same criterion, stop and raise to the user: at that point the evidence points at a wrong criterion or a wrong plan, not at code that needs another attempt.
 
 ## Hard rules
 
