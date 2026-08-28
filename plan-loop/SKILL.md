@@ -9,7 +9,7 @@ description: Frame a task into a plan document with concrete, testable acceptanc
 
 Shared contract: `~/.claude/skills/lifecycle/LIFECYCLE.md` (the artifact, status machine, gates, adapter). Read it first, resolve the adapter, and read `{conventions_files}` before anything below.
 
-The output is one plan document in `{artifact_dir}` named per `{artifact_naming}`. Everything downstream — build's task list, verify's checklist, retro's attribution — keys off this document, so its quality bounds the whole lifecycle. The two stages are ordered on purpose: **what "done" means is settled and approved before how-to-build is explored**, so implementation convenience can never quietly bend the definition of done.
+The output is one plan document in the plan store `{plan_store}`, named per `{plan_naming}` — **never inside the product repository**; it is a process artifact, not a deliverable, and reaches reviewers through the PR description instead. Everything downstream — build's task list, verify's checklist, retro's attribution — keys off this document, so its quality bounds the whole lifecycle. The two stages are ordered on purpose: **what "done" means is settled and approved before how-to-build is explored**, so implementation convenience can never quietly bend the definition of done.
 
 ## 0. Preconditions
 
@@ -25,7 +25,7 @@ Read the task description. Then verify every factual claim in it against the cod
 
 ### 1b. Write the frame sections
 
-Create the plan doc with header (`Generated:` / `Branch:` / `Status: planning`) and:
+Create the plan doc in `{plan_store}` with header (`Generated:` / `Repo:` / `Branch:` / `Status: planning`) — the repo line matters because the store spans repositories — and:
 
 - `## Problem` — what is wrong or missing, for whom, with evidence pointers.
 - `## Decisions` — numbered, settled choices, each with its reason. Decisions that belong to the user (product behavior, money, legal) are asked, not made.
@@ -47,7 +47,7 @@ Verdicts per criterion: **pass / rewrite / drop**. Only passing criteria reach t
 
 ### 1d. Gate 1
 
-Present the criteria (and open questions, resolved or explicitly deferred) to the user and **stop — end the turn**. On approval in the user's own words: set Status `criteria-approved`, commit the doc. The criteria section is now frozen (LIFECYCLE.md § The artifact); from here on it changes only by a dated banner the user approves.
+Present the criteria (and open questions, resolved or explicitly deferred) to the user and **stop — end the turn**. On approval in the user's own words: set Status `criteria-approved` and **commit the doc in the plan store** — that commit is the freeze's anchor, the one verify later diffs against. The criteria section is now frozen (LIFECYCLE.md § The artifact); from here on it changes only by a dated banner the user approves.
 
 ## 2. Stage B — blueprint
 
@@ -73,7 +73,7 @@ Explore for reuse before designing anything new: existing operations, models, he
 
 ### 2d. Gate 2
 
-Present shape + build list, **stop — end the turn**. On approval: Status `plan-approved`, commit.
+Present shape + build list, **stop — end the turn**. On approval: Status `plan-approved`, commit in the plan store.
 
 ### 2e. Handoff (unless invoked `no-chain`)
 

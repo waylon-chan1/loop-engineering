@@ -18,7 +18,7 @@ Verify exists because build cannot grade itself: the context that wrote the code
 
 ## 1. Tamper check
 
-Diff the `## Acceptance criteria` section against its state at the gate-1 approval commit (the doc's git history). Any change without a dated, user-approved supersession banner is a **headline finding** — report it first, before any verdicts, and treat affected criteria as unadjudicable until the user rules.
+Diff the `## Acceptance criteria` section against its state at the gate-1 approval commit **in the plan store's git history** (`{plan_store}`). Any change without a dated, user-approved supersession banner is a **headline finding** — report it first, before any verdicts, and treat affected criteria as unadjudicable until the user rules.
 
 ## 2. Adjudicate, criterion by criterion, in order
 
@@ -42,7 +42,7 @@ Diff the `## Acceptance criteria` section against its state at the gate-1 approv
 
 Unless invoked `no-chain`, append a `## Chain log` line and spawn **one** successor per the outcome:
 
-- **All PASS, no USER items** → Status `verified-local`; spawn an agent to open the PR and run `{review_skill}`. That agent stops when the PR is merge-ready — merging is the human's.
+- **All PASS, no USER items** → Status `verified-local`; spawn an agent to open the PR and run `{review_skill}`. **That agent writes the plan's reviewer-facing rendering into the PR description** (LIFECYCLE.md § The artifact) — criteria with verdicts and evidence, deviations, companion repos and deploy order, NOT-in-scope with routing — and confirms the plan document itself is absent from the diff. It stops when the PR is merge-ready; merging is the human's.
 - **Any FAIL** (within the 2-round repair cap) → Status stays `built`; spawn a build agent in repair mode with the failing criteria and their evidence attached. Verify never fixes code — not even the one-liner; grading and repairing in one context is the failure this skill exists to prevent.
 - **FAIL past the repair cap, or any USER verdict, or a tamper finding** → no successor. Stop and report to the user. Three failures against one criterion is evidence about the criterion, not about the code; a USER item is by definition not yours to discharge.
 

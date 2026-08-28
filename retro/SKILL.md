@@ -12,8 +12,8 @@ Retro is the mechanism that makes this a *loop*: it converts what actually happe
 ## 0. Preconditions
 
 - Plan doc Status `merged` (or invoked in sweep mode, below). Wrong status → name the correct command and stop.
-- **Sweep mode** (the autonomous entry point, run on a schedule): pull the repo's default branch, list plan docs in `{artifact_dir}` with Status `merged`, run this skill per doc, then the dead-rule audit. Setting `closed` at the end of each doc (step 5a) is what makes the sweep idempotent — a doc is never harvested twice.
-- Inputs to gather: the review skill's adjudication tally (finding → verdict → reason), the PR's thread history and commits, verify's report (FAILs, USER outcomes, tamper findings), the plan doc's `## Deviations`, and any human overrides during the run.
+- **Sweep mode** (the autonomous entry point, run on a schedule): list plan docs in `{plan_store}` with Status `merged` — the store spans repos, so use each doc's `Repo:` header to work in the right one — run this skill per doc, then the dead-rule audit. Setting `closed` at the end of each doc (step 5a) is what makes the sweep idempotent — a doc is never harvested twice.
+- Inputs to gather: the review skill's adjudication tally (finding → verdict → reason), the PR's thread history and commits, verify's report (FAILs, USER outcomes, tamper findings), the plan doc's `## Deviations`, and any human overrides during the run. If the local working copy is missing, the merged PR description holds the published plan — recover it with `gh pr view`.
 
 ## 1. Qualify candidates — the bar, in full
 
@@ -57,7 +57,7 @@ While the skills are user-level, graduation edits them directly — apply, commi
 
 ## 5a. Close the task and end the chain
 
-Set the plan doc's Status → `closed` (commit the doc change through the repo's normal flow). `closed` is the terminal state; it marks the doc as harvested.
+Set the plan doc's Status → `closed` and commit it **in the plan store**. `closed` is the terminal state; it marks the doc as harvested. Nothing about closing a task touches the product repo.
 
 Retro spawns **no successor** — it is the end of the lifecycle. In sweep mode it iterates the remaining docs itself rather than chaining, so a backlog of merged tasks can never fan out into a swarm.
 

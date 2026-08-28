@@ -12,7 +12,14 @@ This file is the contract those skills share: the artifact, the status machine, 
 
 ## The artifact
 
-One plan document per task, created by `plan-loop` Stage A, committed to the repo, riding in the PR. Location and filename come from the adapter (`{artifact_dir}`, `{artifact_naming}`). The document is the lifecycle's entire cross-session state — any skill can resume from it in a fresh session by reading the Status line.
+One plan document per task, created by `plan-loop` Stage A. It is the lifecycle's entire cross-session state — any skill resumes from it in a fresh session by reading the Status line — and it exists in two places, with different jobs:
+
+- **The working copy lives outside the product repository**, in the plan store at `{plan_store}` (a git repository of its own, holding plans for every repo). **Plan documents are never committed to the product repo** — they are process artifacts, not deliverables, and a repo's history should carry the change, not the paperwork that produced it. The store's own git history is what makes the criteria freeze enforceable and what lets a killed chain resume.
+- **The published copy is the pull request description**, written when the PR opens and refreshed if the plan changes. That is what reviewers read, and after merge it is the durable public record — recoverable with `gh pr view` even if the local store is gone.
+
+Filenames follow `{plan_naming}`. Since the store spans repositories, each document's header names the repo and branch it belongs to.
+
+The PR description carries the **reviewer-facing rendering**: Problem, Decisions, Acceptance criteria with their verdicts and evidence, Deviations, Companion repos with deploy order, and NOT-in-scope with routing. Exploration notes and scratch stay in the working copy. The test is whether a reviewer needs anything beyond the PR to judge the change; if they do, the rendering is too thin.
 
 Section ownership and mutability:
 
@@ -29,7 +36,7 @@ Section ownership and mutability:
 | `## Companion repos` — repo, why, planned change, criteria served, deploy order | plan-loop Stage B (Stage A if criteria span repos) | gated at gate 2; a repo not listed here may not be written to |
 | `## Verification evidence` — verdict + evidence per criterion | verify | verify only |
 
-**Frozen is a checkable property, not an honor rule.** Frozen sections change only by appending a dated supersession banner (`> **YYYY-MM-DD revision:** …`) above the superseded text, never by in-place rewrites — and criteria banners additionally require the user's explicit approval. `verify` diffs the criteria section against the document's state at the gate-1 approval commit; any unbannered change is a headline finding.
+**Frozen is a checkable property, not an honor rule.** Frozen sections change only by appending a dated supersession banner (`> **YYYY-MM-DD revision:** …`) above the superseded text, never by in-place rewrites — and criteria banners additionally require the user's explicit approval. Every gate approval and every section handoff is a commit **in the plan store**, so `verify` diffs the criteria section against its state at the gate-1 commit there; any unbannered change is a headline finding. Moving plans out of the product repo doesn't weaken this — the enforcing history just lives in the store instead.
 
 **Small mode.** A contained bugfix gets Problem, Acceptance criteria, Build list, and Failure Modes only. Same gates, same freeze, less paper. `plan-loop` decides the mode and says so; the user can override at gate 1.
 
@@ -135,7 +142,7 @@ The four skills carry zero repository facts. Every repo-specific value is an **a
 
 | Key | Meaning |
 |---|---|
-| `{artifact_dir}` / `{artifact_naming}` | Where plan documents live; filename pattern |
+| `{plan_store}` / `{plan_naming}` | The git-backed directory holding plan documents — **outside every product repo** — and the filename pattern |
 | `{conventions_files}` | The repo's authoritative instructions (read before anything else) |
 | `{test_command}` / `{test_focus_command}` | Full suite; single file/example |
 | `{lint_command}` | Linter over changed files |
