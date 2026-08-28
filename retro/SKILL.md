@@ -12,6 +12,7 @@ Retro is the mechanism that makes this a *loop*: it converts what actually happe
 ## 0. Preconditions
 
 - Plan doc Status `merged` (or invoked in sweep mode, below). Wrong status → name the correct command and stop.
+- A nested lifecycle (one with a `Parent:` header) is harvested **as its own task**, attributed to its own repo — its misses belong to the stage that made them there, not to the parent. Read the parent for the authorization context; don't merge the two records.
 - **Sweep mode** (the autonomous entry point, run on a schedule): list plan docs in `{plan_store}` with Status `merged` — the store spans repos, so use each doc's `Repo:` header to work in the right one — run this skill per doc, then the dead-rule audit. Setting `closed` at the end of each doc (step 5a) is what makes the sweep idempotent — a doc is never harvested twice.
 - Inputs to gather: the review skill's adjudication tally (finding → verdict → reason), the PR's thread history and commits, verify's report (FAILs, USER outcomes, tamper findings), the plan doc's `## Deviations`, and any human overrides during the run. If the local working copy is missing, the merged PR description holds the published plan — recover it with `gh pr view`.
 

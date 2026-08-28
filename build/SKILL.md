@@ -36,13 +36,17 @@ After the last task: run `{regen_artifacts}` for any behavior change, then `{ci_
 
 ## 2b. Companion repositories
 
-If the plan has a `## Companion repos` section, spawn **one leaf agent per repo** after the working repo's tasks are green (or earlier if the plan's deploy order requires the companion to lead). Each leaf agent is told: the target repo's clone path, the specific planned change, the criteria it serves, and that it must resolve **that repo's own adapter** — an existing adapter written by a session that works in that repo outranks your inference about it; bootstrap one only if none exists.
+If the plan has a `## Companion repos` section, spawn **one agent per repo** to run a **complete nested lifecycle there** (LIFECYCLE.md § Cross-repository work) — after the working repo's tasks are green, or earlier if the plan's deploy order requires that side to lead.
 
-Every leaf agent, in order: confirm the target tree is **clean and on its default branch** (dirty → stop and report; never stash or reset over someone's uncommitted work), branch, make only the planned change, write and run tests with that repo's commands, open a PR in that repo, and return a report. It spawns nothing further — leaf agents never chain.
+Each agent is told: the target repo's clone path, the parent plan's path, the specific change the parent authorized, and the criteria it serves. It then runs the full inner lifecycle in that repo — its own plan document (with a `Parent:` header), its own criteria, build → diff audit → verify → PR — resolving **that repo's own adapter**, never yours. An adapter written by a session that works in that repo outranks your inference about it; bootstrap one only if none exists.
+
+The inner lifecycle inherits the parent's gate-2 authorization for the change the parent described, so it does not re-gate approved work. It does **not** inherit permission for scope it discovers on its own: materially wider work is a `plan-error` it reports up rather than builds. It may not spawn nested lifecycles of its own (depth 1), and may not enter a repo already in the lineage.
+
+Before touching any companion repo, in order: confirm the tree is **clean and on its default branch** (dirty → stop and report; never stash or reset over someone's uncommitted work), then branch.
 
 Read-only investigation of any repo needs no plan entry and no ceremony. **Writing to a repo the plan doesn't name is `scope-declined`**, exactly as in the working repo — a companion diff nobody approved is scope creep with a wider blast radius.
 
-Record each companion PR and its deploy-order position in the plan doc.
+Record each companion's inner plan document, its PR, and its deploy-order position in the parent plan's `## Companion repos` section — linked both ways, so retro can read down and a resumed inner lifecycle can find its authorization.
 
 ## 3. Deviation protocol — ordered, checked at every divergence
 

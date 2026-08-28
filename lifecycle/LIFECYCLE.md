@@ -33,6 +33,7 @@ Section ownership and mutability:
 | `## Shape`, `## Build list`, `## Failure Modes` | plan Stage B | build checks boxes; dated banners for structural change |
 | `## Deviations` — dated, classed | build | append-only |
 | `## Chain log` — one line per handoff | every skill that spawns a successor | append-only |
+| Header `Parent:` — the parent plan, on nested lifecycles only | plan-loop of the inner lifecycle | set once |
 | `## Companion repos` — repo, why, planned change, criteria served, deploy order | plan-loop Stage B (Stage A if criteria span repos) | gated at gate 2; a repo not listed here may not be written to |
 | `## Verification evidence` — verdict + evidence per criterion | verify | verify only |
 
@@ -82,7 +83,7 @@ The **autonomous segment** is therefore gate 2 → merge-ready: `build → {diff
 
 **Freshness holds by construction.** Every verify is a newly spawned agent that has not seen build's transcript. No skill may ever verify work it performed — spawning satisfies this automatically, which is why verify is never invoked inline by build.
 
-**Runaway control.** Each skill spawns **at most one** successor. Every hop appends a line to `## Chain log` in the plan document: timestamp, from → to, and why. A skill whose hop would push the log past **12 entries** stops and reports instead. A lifecycle that has taken twelve hops is malfunctioning, not working hard.
+**Runaway control.** Each skill spawns **at most one** chain successor, plus one nested lifecycle per companion repo the plan names (§ Cross-repository work — bounded to depth 1, no repo twice in a lineage). Every hop appends a line to `## Chain log` in the plan document: timestamp, from → to, and why. A skill whose hop would push the log past **12 entries** stops and reports instead. A lifecycle that has taken twelve hops is malfunctioning, not working hard.
 
 ## Cross-repository work
 
@@ -93,7 +94,20 @@ A task's behavior often spans repositories — a backend contract its client con
 - **Read-only investigation** — any stage, any repo, no ceremony. Verifying what a client actually sends, what a service actually returns, or whether a dependency's `origin/main` really contains the change you're told it does. Confirm merges by querying the forge (`gh pr view <n> --repo <org>/<repo> --json state,mergedAt`); a file existing locally proves nothing about what shipped.
 - **Writing** — a companion repo may be modified only if it is named in the plan document's `## Companion repos` section and approved at gate 2. A change discovered mid-build in a repo nobody approved is `scope-declined`, exactly as it would be in the working repo. This is the same boundary as always; the blast radius is simply larger, because a companion repo's diff was never in the user's approved scope unless they put it there.
 
-**Companion agents are leaf workers.** Build spawns one agent per planned companion repo. Each resolves **that repo's own adapter** (LIFECYCLE.md § The adapter — bootstrap it if absent; an adapter written by a session working in that repo is authoritative over your inference), performs only the change the plan names, runs that repo's tests with that repo's commands, and reports back. A leaf agent **never chains** — it spawns no successor and starts no lifecycle of its own. That is what keeps fan-out bounded: the one-successor rule governs the chain, and leaves are not links in it.
+**Each companion repo gets its own nested lifecycle.** Build spawns one agent per planned companion repo, and that agent runs a **complete inner lifecycle in that repo** — its own plan document in the store, its own criteria, its own build → diff audit → verify → PR — using **that repo's own adapter** (bootstrap it if absent; an adapter written by a session that works in that repo is authoritative over your inference). A companion change deserves the same discipline as the work that spawned it: criteria before code, fresh-eyes verification, its own reviewable PR. Treating it as a quick side-edit is how the sloppiest half of a cross-repo change gets made.
+
+The inner lifecycle is a real lifecycle, so it obeys every rule here — including the repair loop, the hop budget, and the deviation protocol.
+
+**Recursion bounds.** These replace the fan-out limit that a non-chaining worker would have given for free, and they are what keep "recursive" from meaning "unbounded":
+
+- **Depth 1.** A nested lifecycle may not spawn nested lifecycles of its own. If an inner lifecycle discovers it needs a *third* repo, it stops and escalates to the user through its parent — it does not recurse. Two hops of repo delegation is coordination; three is a program nobody is watching.
+- **No repo twice in one ancestry.** A repo already present in the chain's lineage may not be entered again. Without this, a producer and its consumer delegate to each other forever.
+- **Inherited authorization, not new gates.** The parent's gate 2 already authorized *this repo and this change*, so the inner lifecycle does not re-gate what was approved — it runs plan → verify autonomously within that authorized scope. But if its own framing concludes the work is materially wider than the parent named, that is a `plan-error`: stop, report through the parent, let the user decide. Inherited approval covers the scope that was described, never the scope that was discovered.
+- **Its own chain log and hop budget.** The inner document tracks its own hops; the parent records one delegation line per companion. Neither budget subsidizes the other.
+
+**Linkage.** The inner plan document carries a `Parent:` header naming the parent plan; the parent's `## Companion repos` section links each inner document and its PR. Both directions are needed — retro reads down from the parent, and an inner lifecycle resumed by hand must be able to find its authorization.
+
+**The parent waits.** A cross-repo criterion cannot reach PASS until the inner lifecycle it depends on is merge-ready. The parent's verify checks that at the boundary rather than trusting the inner report.
 
 **Preconditions before touching any companion repo, checked in order:**
 
