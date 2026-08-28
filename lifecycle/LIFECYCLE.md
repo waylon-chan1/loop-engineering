@@ -87,7 +87,7 @@ The **autonomous segment** is therefore gate 2 → merge-ready: `build → {diff
 
 ## Cross-repository work
 
-A task's behavior often spans repositories — a backend contract its client consumes, a service its caller depends on. The lifecycle handles this with **repo-scoped leaf agents**, under one governing distinction:
+A task's behavior often spans repositories — a backend contract its client consumes, a service its caller depends on. The lifecycle handles this with **nested lifecycles**, under one governing distinction:
 
 **Reading another repo is always allowed. Writing to one must be planned and gated.**
 
@@ -142,6 +142,19 @@ No silent deviations of any class. An empty Deviations section asserts the plan 
 ## Routing out-of-scope work
 
 Real work discovered mid-lifecycle goes to the repo's follow-up channel (`{followup_routing}`), filtered by the impact bar: **file it only if it drives real impact, fixes a real hole, or meaningfully improves user experience.** The test: *would the owner of that backlog thank you for this ticket, or archive it?* Hypotheticals, futureproofing, style preferences, and micro-refactors are not tickets. Dedupe against existing entries before creating one.
+
+## How findings are reported
+
+Every report a skill hands back to a human — verdicts, failures, deviations, raised questions, retro lessons — is written in **plain English, short, and to the point.** The reader is scanning; make the point findable in seconds.
+
+- **One line per finding, and the point comes first.** What is wrong or what happened, then where, then what it means. Not a narrative that arrives at the conclusion last.
+- **No internal vocabulary.** Say "the plan said X, the code actually does Y" instead of "gate 2 traceability divergence." Say "this needs you to look at it" instead of "USER verdict pending adjudication." The status words in this contract are for the documents; reports explain themselves to someone who has never read this file.
+- **Concrete over abstract.** Name the file, the command, the number, the exact thing that failed. "The refund spec fails: expected 500 cents, got 5000" beats "monetary assertion mismatch in the payments layer."
+- **Lead with what needs attention.** Failures, blocked items, and anything needing a decision go first — before passes, before summaries of work done. If everything passed, say that in one line and stop.
+- **No hedging and no padding.** Don't restate the task back, don't explain what you were about to do, don't soften a failure into a "consideration." If something is broken, say it is broken.
+- **Say what you want from the reader.** End with the decision needed or the next command — never leave them to infer whether they are being informed or asked.
+
+Length is not thoroughness. A report nobody finishes reading has failed no matter how complete it is.
 
 ## Verdict vocabularies (fixed)
 

@@ -55,4 +55,8 @@ Unless invoked `no-chain`, append a `## Chain log` line and spawn **one** succes
 
 ## Report
 
-FAIL/USER items first. Then the criterion table: number | statement (abbreviated) | method | verdict | evidence pointer. Then regression result, tamper-check result, Status change, and the exact next command.
+Plain English, short, point first (LIFECYCLE.md § How findings are reported).
+
+Anything broken or needing you goes at the top, one line each: what failed, where, what it means. Then a compact table — criterion | what it checks | how checked | verdict | evidence. Then regression and tamper-check results in a line apiece, the Status change, and the next command.
+
+Write it for someone who has never read this contract: "criterion 3 fails — the API returns 200 with an empty body when it should return 422" rather than "criterion 3 FAIL, envelope conformance divergence." If everything passed, say so in one line and stop.

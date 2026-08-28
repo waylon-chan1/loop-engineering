@@ -61,7 +61,7 @@ No silent deviations. An empty `## Deviations` section is a claim that the plan 
 ## 4. Wrap and hand off
 
 - Update Status → `built`; commit the **plan doc in the plan store** and the **code in the product repo** separately. The plan document never enters the product repo's diff — if it appears in `git status` there, that is a mistake to undo, not a file to add.
-- Report: per-task verdicts, deviation log summary, spec suite delta (examples added, red→green), CI result, anything routed out of scope.
+- Report in plain English, short, point first (LIFECYCLE.md § How findings are reported): anything blocked or that departed from the plan goes at the top in one line each, then what got built and what proves it (tests added, red→green, CI result), then anything you declined to build and where it went. Skip the play-by-play — what changed and what's now true, not the order you did it in.
 - **Handoff** (unless invoked `no-chain`): append a `## Chain log` line and spawn **one** subagent to run `{diff_audit_skill}` on the diff and then hand off to verify. Pass only the plan document path. **Never invoke verify inline** — a context that implemented cannot grade its own work, and spawning is what preserves that separation.
 - A `plan-error` STOP does not hand off. The approved plan is void; the chain ends and the user decides.
 

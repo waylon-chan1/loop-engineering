@@ -75,4 +75,6 @@ Any rule with no associated catch across many runs is a deletion candidate — p
 
 ## Report
 
-Qualified lessons (stage, outcome, new-or-bumped), rejected candidates with the failed bar, graduations performed (diff summary + commit), tracker state (reachable or not), and — if this closes a task — the plan doc's final Status.
+Plain English, short, point first (LIFECYCLE.md § How findings are reported).
+
+Lead with what you changed about the system and why — one line each, in the form "we kept doing X, so now the skill does Y." Then what you chose not to record and why, anything you're escalating instead of applying, and whether the tracker was reachable. Skip the ceremony; a reader should learn in ten seconds what the system got better at this week.

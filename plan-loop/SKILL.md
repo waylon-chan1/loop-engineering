@@ -91,4 +91,6 @@ Gate 1 never chains: Stage A ends by stopping for the user, full stop.
 
 ## Report
 
-End every invocation with: the mode (full/small), the stage completed, criteria count by tag, open questions, what was routed out of scope, and the exact next command.
+Plain English, short, point first (LIFECYCLE.md § How findings are reported).
+
+At a gate, the criteria themselves are the report — list them as the plain statements they are, so the user is approving something readable rather than a spec. Then: anything you need answered, what you deliberately left out and where it went, and the exact next command. Mention the mode only if it is small mode.
