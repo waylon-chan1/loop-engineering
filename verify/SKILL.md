@@ -44,7 +44,7 @@ Unless invoked `no-chain`, append a `## Chain log` line and spawn **one** succes
 
 - **All PASS, no USER items** → Status `verified-local`; spawn an agent to open the PR and run `{review_skill}`. **That agent writes the plan's reviewer-facing rendering into the PR description** (LIFECYCLE.md § The artifact) — criteria with verdicts and evidence, deviations, companion repos and deploy order, NOT-in-scope with routing — and confirms the plan document itself is absent from the diff. It stops when the PR is merge-ready; merging is the human's.
 - **Any FAIL** (within the 2-round repair cap) → Status stays `built`; spawn a build agent in repair mode with the failing criteria and their evidence attached. Verify never fixes code — not even the one-liner; grading and repairing in one context is the failure this skill exists to prevent.
-- **FAIL past the repair cap, or any USER verdict, or a tamper finding** → no successor. Stop and report to the user. Three failures against one criterion is evidence about the criterion, not about the code; a USER item is by definition not yours to discharge.
+- **FAIL past the repair cap, or any USER verdict, or a tamper finding** → no successor. Stop and report to your spawner — the user at the root, your parent agent when nested (a USER verdict always ends up with the human, since only they can discharge it). Three failures against one criterion is evidence about the criterion, not about the code; a USER item is by definition not yours to discharge.
 
 ## Hard rules
 

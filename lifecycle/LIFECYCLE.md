@@ -64,15 +64,19 @@ Every skill ends its report by naming the exact next command. The status line �
 
 Each skill ends by **spawning the next actor as a subagent**, so an approved task runs to completion without further prompting. Chaining is on by default; an invocation carrying `no-chain` performs its own stage and stops.
 
-The chain is driven by the artifact, never by a parent's memory. A spawned agent receives exactly two things: the plan document's path and its own stage instruction. It reads Status itself and refuses if Status doesn't match its stage. Two consequences worth stating: a chain killed mid-flight (closed session, crash, `no-chain`) is always resumable by invoking the right skill by hand, and no agent inherits an upstream agent's conclusions — only the written record they were required to leave behind.
+**Whoever spawns an agent owns it.** This governs every subagent in the system, not just cross-repo children: the spawner sets the scope, answers the questions, approves the work, and is accountable for the result. A subagent does not go to the user — it goes to its spawner. The user is reached only by escalation up that ownership chain, and only for the one thing a spawner cannot decide: something that **contradicts the root plan the user approved**. Difficulty, surprise, and detail are the spawner's to resolve; a broken contract is the user's.
+
+**The root approved plan travels to every agent.** Each spawned agent receives the path to the plan document it works from, its own stage instruction, and the **root approved plan** — the criteria, decisions, and scope the user actually signed off on (the same document, when the work is single-repo). That is what every agent checks itself against, and it is why agents can plan and build without a human present: they are not inferring intent, they are reading an approved contract. An agent that cannot see the root plan asks its spawner for it rather than proceeding on assumption.
+
+The chain is driven by the artifact, never by a parent's memory. Beyond those three inputs, a spawned agent inherits nothing — no conclusions, no exploration notes. It reads Status itself and refuses if Status doesn't match its stage. Two consequences worth stating: a chain killed mid-flight (closed session, crash, `no-chain`) is always resumable by invoking the right skill by hand, and no agent inherits an upstream agent's conclusions — only the written record they were required to leave behind.
 
 **Stop points. The chain never crosses these:**
 
 | Stops after | Because |
 |---|---|
-| plan-loop Stage A | Gate 1 — only the user approves criteria |
-| plan-loop Stage B | Gate 2 — only the user approves the build plan |
-| a `plan-error` deviation in build | the approved plan is void; only the user can re-authorize |
+| plan-loop Stage A | Gate 1 — the criteria need approval. **Root lifecycle: the user's.** Nested: the parent's, and the chain continues |
+| plan-loop Stage B | Gate 2 — the build plan needs approval. Same split as gate 1 |
+| a `plan-error` that contradicts the **root** plan | the user's approved contract is void; only they can re-authorize. A plan-error that stays inside the root contract is resolved by the spawner and the chain continues |
 | verify FAIL past the repair cap | repeated failure means the plan or the criteria are wrong, not the code |
 | any verify USER verdict | only a human can discharge it |
 | a PR that is ready to merge | merging is outward-facing and needs review approval; the human merges |
@@ -102,7 +106,7 @@ The inner lifecycle is a real lifecycle, so it obeys every rule here — includi
 
 - **Depth 1.** A nested lifecycle may not spawn nested lifecycles of its own. If an inner lifecycle discovers it needs a *third* repo, it stops and escalates to the user through its parent — it does not recurse. Two hops of repo delegation is coordination; three is a program nobody is watching.
 - **No repo twice in one ancestry.** A repo already present in the chain's lineage may not be entered again. Without this, a producer and its consumer delegate to each other forever.
-- **Inherited authorization, not new gates.** The parent's gate 2 already authorized *this repo and this change*, so the inner lifecycle does not re-gate what was approved — it runs plan → verify autonomously within that authorized scope. But if its own framing concludes the work is materially wider than the parent named, that is a `plan-error`: stop, report through the parent, let the user decide. Inherited approval covers the scope that was described, never the scope that was discovered.
+- **The parent holds the child's gates** (§ Chaining — whoever spawns an agent owns it). The parent approves the inner criteria and the inner build plan; the user is **not** asked to confirm planning again for a companion repo, because they already approved the root plan that authorized this work. The parent reviews the child's criteria against the root contract before the child builds, exactly as a human would have, and is accountable for what the child ships. Escalation to the user happens only on contradiction with the root plan, never on mere novelty or difficulty.
 - **Its own chain log and hop budget.** The inner document tracks its own hops; the parent records one delegation line per companion. Neither budget subsidizes the other.
 
 **Linkage.** The inner plan document carries a `Parent:` header naming the parent plan; the parent's `## Companion repos` section links each inner document and its PR. Both directions are needed — retro reads down from the parent, and an inner lifecycle resumed by hand must be able to find its authorization.

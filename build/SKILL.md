@@ -38,9 +38,11 @@ After the last task: run `{regen_artifacts}` for any behavior change, then `{ci_
 
 If the plan has a `## Companion repos` section, spawn **one agent per repo** to run a **complete nested lifecycle there** (LIFECYCLE.md § Cross-repository work) — after the working repo's tasks are green, or earlier if the plan's deploy order requires that side to lead.
 
-Each agent is told: the target repo's clone path, the parent plan's path, the specific change the parent authorized, and the criteria it serves. It then runs the full inner lifecycle in that repo — its own plan document (with a `Parent:` header), its own criteria, build → diff audit → verify → PR — resolving **that repo's own adapter**, never yours. An adapter written by a session that works in that repo outranks your inference about it; bootstrap one only if none exists.
+Each agent is told: the target repo's clone path, the parent plan's path, **the root approved plan**, the specific change it is authorized to make, and the criteria it serves. Pass the root plan every time — a child that can see what the user actually approved can hold itself to it; one that can't is guessing.
 
-The inner lifecycle inherits the parent's gate-2 authorization for the change the parent described, so it does not re-gate approved work. It does **not** inherit permission for scope it discovers on its own: materially wider work is a `plan-error` it reports up rather than builds. It may not spawn nested lifecycles of its own (depth 1), and may not enter a repo already in the lineage.
+**You hold that child's gates.** It presents its criteria and build plan to you, not to the user, and you approve or redirect them against the root contract. Only a contradiction with the root plan goes up to the user. It then runs the full inner lifecycle in that repo — its own plan document (with a `Parent:` header), its own criteria, build → diff audit → verify → PR — resolving **that repo's own adapter**, never yours. An adapter written by a session that works in that repo outranks your inference about it; bootstrap one only if none exists.
+
+The inner lifecycle does not re-gate work the user already approved. It also does not inherit permission for scope it discovers on its own — materially wider work is a `plan-error` it reports **to you**, and you decide whether it fits the root contract or has to go to the user. It may not spawn nested lifecycles of its own (depth 1), and may not enter a repo already in the lineage.
 
 Before touching any companion repo, in order: confirm the tree is **clean and on its default branch** (dirty → stop and report; never stash or reset over someone's uncommitted work), then branch.
 
@@ -52,7 +54,7 @@ Record each companion's inner plan document, its PR, and its deploy-order positi
 
 The split: **structure needs the user; implementation belongs to the agent.**
 
-1. **Plan-error** — reality contradicts a plan claim in a way that invalidates a criterion, the shape, or task ordering (the API doesn't exist, the table has different semantics, the ordering is impossible). Append a dated `plan-error` entry to `## Deviations`, **STOP, return to the user.** Never improvise a redesign mid-build: the plan was approved as a whole, and a locally-clever substitution silently voids that approval.
+1. **Plan-error** — reality contradicts a plan claim in a way that invalidates a criterion, the shape, or task ordering (the API doesn't exist, the table has different semantics, the ordering is impossible). Append a dated `plan-error` entry to `## Deviations` and **STOP, returning to your spawner** — the user if you are the root lifecycle, your parent agent if you were spawned for a companion repo. The parent resolves anything that still fits the root contract; only a contradiction with the root plan travels up to the user. Never improvise a redesign mid-build: the plan was approved as a whole, and a locally-clever substitution silently voids that approval.
 2. **Mechanical** — implementation-level divergence: naming, file placement, private structure, an equivalent query. Log it as `mechanical`, proceed without asking. These are yours to own; stopping for them is noise.
 3. **Scope-declined** — you discovered work no criterion demands: a new endpoint, migration, flag, abstraction, adjacent bug. **Never build it**, even when it's obviously good. Route it per `{followup_routing}` under the impact bar, log `scope-declined` with the routing link.
 
@@ -67,7 +69,7 @@ No silent deviations. An empty `## Deviations` section is a claim that the plan 
 
 ## 4b. Repair mode
 
-When spawned by verify with failing criteria: fix **only** those criteria, using the evidence verify attached. Do not re-litigate the verdict, do not refactor adjacent code, do not touch passing criteria. Log each repair in `## Deviations`, then hand off to a **new** verify agent (never the one that graded you). The repair cap is 2 rounds — on a third failure of the same criterion, stop and raise to the user: at that point the evidence points at a wrong criterion or a wrong plan, not at code that needs another attempt.
+When spawned by verify with failing criteria: fix **only** those criteria, using the evidence verify attached. Do not re-litigate the verdict, do not refactor adjacent code, do not touch passing criteria. Log each repair in `## Deviations`, then hand off to a **new** verify agent (never the one that graded you). The repair cap is 2 rounds — on a third failure of the same criterion, stop and raise to your spawner (the user at the root, your parent when nested): at that point the evidence points at a wrong criterion or a wrong plan, not at code that needs another attempt.
 
 ## Hard rules
 
