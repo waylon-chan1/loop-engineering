@@ -12,8 +12,9 @@ Verify exists because build cannot grade itself: the context that wrote the code
 ## 0. Preconditions
 
 - Plan doc Status must be `built` (run after the diff audit, since that mutates the diff — adjudicate what will actually ship). Wrong status → name the correct command and stop.
-- Fresh context confirmed: if you implemented this task in this session, spawn a fresh subagent for the adjudication or instruct the user to run verify in a new session. Do not proceed as your own grader. (In a chained run this holds automatically — verify always arrives as a newly spawned agent.)
-- Read `## Chain log` to learn which repair round this is, if any.
+- Fresh context, obtained without the user: if you implemented this task, or watched the repair that produced this state, **spawn a fresh subagent to adjudicate and let it report** — never ask the user to re-run verify in a new session. Freshness is the system's job to arrange, not a chore to hand to a human; a lifecycle that pauses for someone to open a terminal isn't autonomous. (In a chained run this holds automatically — verify always arrives newly spawned.)
+- Read `## Chain log` to learn which repair round this is, if any. **Every round gets a genuinely new verifier**: not the agent that issued the previous verdict, and not one that saw the repair being made. Repeat verification is spawned automatically by the repair loop and needs no human to start it.
+- **Re-verification covers every criterion, not just the repaired ones.** A fix aimed at one criterion routinely breaks another, and with no human watching the rounds, a narrowed re-check is how a regression reaches the PR wearing a PASS.
 - `{workspace_bootstrap}` if needed.
 
 ## 1. Tamper check
@@ -49,6 +50,7 @@ Unless invoked `no-chain`, append a `## Chain log` line and spawn **one** succes
 ## Hard rules
 
 - **Never adjudicate from build's claims, logs, or memory.** Re-derive or it didn't happen.
+- **Never ask the user to run a verification for you.** If you need a clean context, spawn one. The only things that stop this chain are a USER verdict, a tamper finding, or the repair cap.
 - **Never fix what you find.** Grading and repairing in one context recreates the self-grading this skill exists to break.
 - **Never mark USER items PASS**, and never bury them — surface each with its specific question.
 - **Never skip the tamper check.** It is the only enforcement the criteria freeze has.
