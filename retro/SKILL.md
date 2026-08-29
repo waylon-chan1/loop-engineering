@@ -58,7 +58,7 @@ Threshold: **Times Seen ≥ 3 (distinct tasks), or one severe miss** (shipped de
 2. **Contradiction check.** Before applying, test the lesson against what already stands: does it contradict an existing skill rule, `{conventions_files}`, or `{invariants}`? A contradiction is not a tiebreaker in the lesson's favor — it means either the rule is wrong or the feedback was bad, and that call goes to the user with both sides' evidence. Bad feedback that slipped past the qualification bar gets caught here, before it can rewrite a rule that was right.
 3. Make the **smallest edit that would have prevented the miss**. Skill edits happen between runs, never mid-run, and must cite the tracker rows demanding them — the same evidence rule the skills enforce on code.
 4. Commit in `~/.claude/skills` (it is a git repo), message citing the tracker row.
-5. Dated entry in the stage's Iteration Log: what happened → what changed → row link. Mark the row `graduated`.
+5. Record it in both places, then mark the row `graduated`: a dated line in `CHANGELOG.md` at the engine repo root — which is **public**, so name the rule that changed and the class of evidence, never the private task that surfaced it — and a dated entry in the stage's Iteration Log with what happened → what changed → row link.
 
 While the skills are user-level, graduation edits them directly — apply, commit, log, then **report what changed after the fact; don't ask permission first.** Once a skill has moved into a repo, graduation goes through that repo's normal PR flow.
 
