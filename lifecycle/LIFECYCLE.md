@@ -26,6 +26,7 @@ Section ownership and mutability:
 | Section | Owner | Mutability after the owner's gate |
 |---|---|---|
 | Header: `Generated:` / `Repo:` / `Branch:` / `Tier:` / `Status:` | plan creates; every skill updates Status only | Status is the one always-live line |
+| Header `PR:` — the pull request URL | review-loop, when it opens the PR | set once; it is how a later session or the sweep finds the PR to resolve state from |
 | `## Observations` — dated, stage-tagged facts (friction, surprises), one line each | any agent, any stage | append-only; facts never prescriptions |
 | `## Problem`, `## Decisions` (numbered) | plan Stage A | frozen; dated supersession banners only |
 | `## What already exists (verified <date>)` — every claim cited file:line | plan Stage A | build appends re-verification notes |
@@ -82,9 +83,19 @@ The chain is driven by the artifact, never by a parent's memory. Beyond those th
 | a `plan-error` that contradicts the **root** plan | the user's approved contract is void; only they can re-authorize. A plan-error that stays inside the root contract is resolved by the spawner and the chain continues |
 | verify FAIL past the repair cap | repeated failure means the plan or the criteria are wrong, not the code |
 | any verify USER verdict | only a human can discharge it |
-| a PR that is ready to merge | merging is outward-facing and needs review approval; the human merges |
+| a PR that is merge-ready | **the human merges, always.** Merging is outward-facing and irreversible in practice; no agent merges a PR under any circumstance |
 
-The **autonomous segment** is therefore gate 2 → merge-ready: `build → {diff_audit_skill} → verify → (bounded repair) → open PR → {review_skill}`. Everything outside it is gated on purpose.
+The **autonomous segment** is therefore gate 2 → merge-ready: `build → {diff_audit_skill} → verify → (bounded repair) → review-loop (opens the PR, adjudicates comments)`. Everything outside it is gated on purpose.
+
+**Merge-ready is a checkable state, not a judgment.** A PR is merge-ready when the forge says it is **mergeable** — all of:
+
+1. **CI is green** — every required check has completed and passed. Pending is not green.
+2. **Approval requirements are met** — whatever the repo requires is present.
+3. **No requested changes are outstanding** — no review sits in a changes-requested state.
+
+Read those from the forge rather than inferring them (`gh pr view <n> --repo <org>/<repo> --json mergeable,mergeStateStatus,reviewDecision,statusCheckRollup`); a local green suite is not CI, and a resolved thread is not an approval. One addition, because the alternative is this system's worst failure mode: a PR is **not** merge-ready while an adjudication is still escalated to the user. Reporting merge-ready with a decision still owed by the human buries it, exactly as a USER verdict marked PASS would.
+
+**Nothing observes the merge in-session.** The chain stops at merge-ready and the human merges whenever they merge — minutes or days later, with no agent running. So `in-review → merged` is settled by asking the forge, not by watching: `review-loop` re-invoked on an `in-review` doc checks first, and retro's scheduled sweep resolves any doc left there (§ Lessons; retro § Sweep mode). A merge nobody recorded is a lifecycle that never closes and a lesson never harvested.
 
 **Bounded repair loop.** A verify FAIL spawns a build agent to fix **only the failing criteria**, which spawns a **new** verify agent — never the one that graded, and never one that has seen the repair. Every round of this is spawned automatically; no human starts a re-verification, and no skill may ask one to. Each re-verify re-adjudicates **all** criteria, not just the repaired ones, because a fix that breaks a neighbouring criterion is exactly what an unattended loop would otherwise carry to the PR. Cap: **2 repair rounds**. A third failure against the same criterion stops the chain and raises to the user, because by then the evidence points at a wrong criterion or a wrong plan, and further attempts only burn deeper into a wrong path. Every round appends to the chain log.
 
@@ -249,7 +260,7 @@ The four skills carry zero repository facts. Every repo-specific value is an **a
 
 **Resolution order:** (1) `.claude/lifecycle-context.md` in the repo, if present; (2) `~/.claude/skills/lifecycle/contexts/<repo>.md`, where `<repo>` is the basename of `git remote get-url origin`; (3) neither → run the bootstrap: infer candidates from the repo (README, CI config, `bin/`, `package.json`/`Gemfile`, AGENTS.md/CLAUDE.md), confirm them with the user, write the context file to location (2) for next time.
 
-**Missing keys degrade, they don't block.** No `{mint_test_state}` means manual verification says so and uses `{manual_probe}` from a cold start; no `{ci_command}` means run `{test_command}` + `{lint_command}` separately; no `{diff_audit_skill}` or `{review_skill}` means those stages are performed inline by their generic descriptions. A skill never invents tooling a key doesn't name.
+**Missing keys degrade, they don't block.** No `{mint_test_state}` means manual verification says so and uses `{manual_probe}` from a cold start; no `{ci_command}` means run `{test_command}` + `{lint_command}` separately; no `{diff_audit_skill}` means build's own cull stands as the audit; no `{review_skill}` means review-loop runs the post-PR stage on its generic rules alone, since that stage has its own skill and the key only supplements it. A skill never invents tooling a key doesn't name.
 
 ## Lessons and the tracker
 

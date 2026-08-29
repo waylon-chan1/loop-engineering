@@ -3,7 +3,7 @@
 A near-autonomous development lifecycle built out of [Claude Code](https://claude.com/claude-code) skills. It enforces one discipline: **concrete acceptance criteria are written and human-approved before any code exists**, implementation is test-first against exactly those criteria, and a fresh-eyes verifier — an agent that never saw the implementation — adjudicates the result against the frozen contract.
 
 ```
-plan-loop A ─ gate 1 ─▶ plan-loop B ─ gate 2 ─▶ build ─▶ diff audit ─▶ verify ─▶ PR ─▶ review ─▶ merge ─▶ retro
+plan-loop A ─ gate 1 ─▶ plan-loop B ─ gate 2 ─▶ build ─▶ diff audit ─▶ verify ─▶ review-loop ─▶ merge ─▶ retro
   (criteria)              (build plan)           (TDD)                  (fresh eyes)                    (lessons)
 ```
 
@@ -15,7 +15,7 @@ An engineer prompting an agent starts from scratch every time. This is an attemp
 
 **Nothing grades its own work.** Verify always runs as a newly spawned agent that has not seen build's transcript. A pasted transcript is not evidence — the verifier re-runs every command itself, and PASS requires reproducible evidence recorded in the document. No evidence is a FAIL, not a PASS.
 
-**The document is the orchestrator, not any session's memory.** A `Status:` line (`planning → criteria-approved → plan-approved → building → built → verified-local → merged → closed`) drives everything. Each skill refuses to run out of order and names the command the task actually needs. Any phase resumes in a fresh session with no context handed over.
+**The document is the orchestrator, not any session's memory.** A `Status:` line (`planning → criteria-approved → plan-approved → building → built → verified-local → in-review → merged → closed`) drives everything. Each skill refuses to run out of order and names the command the task actually needs. Any phase resumes in a fresh session with no context handed over.
 
 **It chains itself, within stated bounds.** Each stage spawns the next, so an approved task runs to completion unattended. The bounds are what make that safe: at most one successor per skill, a 2-round verify→repair→re-verify cap, a 12-hop ceiling, and hard stops at both human gates, at any contradiction of the approved plan, at any verdict only a human can discharge, and at merge.
 
@@ -35,6 +35,7 @@ An engineer prompting an agent starts from scratch every time. This is an attemp
 | `plan-loop/SKILL.md` | Stage A frames the task into criteria (gate 1); Stage B scopes the implementation (gate 2) |
 | `build/SKILL.md` | Executes the approved plan test-first, logging every deviation; stops rather than improvising a redesign |
 | `verify/SKILL.md` | Fresh-eyes adjudication: PASS / CHANGED / FAIL / BLOCKED / USER, with evidence |
+| `review-loop/SKILL.md` | Opens the PR and adjudicates every review comment against the criteria contract — fixing what indicts it, pushing back with evidence on what doesn't |
 | `retro/SKILL.md` | Harvests confirmed lessons after merge and graduates the recurring ones |
 | `lifecycle/contexts.example/EXAMPLE.md` | A template adapter — the only place repository facts are allowed to live |
 
@@ -48,9 +49,11 @@ cp ~/.claude/skills/lifecycle/contexts.example/EXAMPLE.md \
 
 Then, in a repository: `/plan-loop <what you want built>`, approve the criteria, approve the build plan, and the rest runs on its own until it needs you.
 
-The four skills contain **zero repository facts**. Commands, conventions, bootstrap steps, follow-up routing, and companion repositories all resolve through the adapter, so a new repository gets the full lifecycle by writing one file. A missing adapter key degrades that capability with a stated reason rather than blocking — and no skill invents tooling a key doesn't name.
+The skills contain **zero repository facts**. Commands, conventions, bootstrap steps, follow-up routing, and companion repositories all resolve through the adapter, so a new repository gets the full lifecycle by writing one file. A missing adapter key degrades that capability with a stated reason rather than blocking — and no skill invents tooling a key doesn't name.
 
-The diff-audit and review stages are deliberately slots rather than implementations: point them at whatever your repository already uses, or let the generic descriptions apply.
+The diff-audit stage is deliberately a slot: point it at whatever your repository already uses, or let build's own test cull stand in. The post-PR stage has its own skill, and a repository-specific review skill only supplements it with extra gates or bot etiquette.
+
+**A human merges, always.** No skill in this repository merges a pull request. The chain stops at merge-ready — CI green, approval requirements met, no requested changes outstanding, nothing still escalated — reports that state, and leaves the decision where it belongs. The merge is picked up afterwards by asking the forge, because nothing is running at the moment someone clicks it.
 
 ## What is not here, on purpose
 
