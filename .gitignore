@@ -21,6 +21,8 @@
 !verify/SKILL.md
 !retro/
 !retro/SKILL.md
+!review-loop/
+!review-loop/SKILL.md
 
 # Private by construction. Real adapters carry internal hostnames, tracker ids,
 # and product facts; run logs carry whatever a run touched. Neither is engine.

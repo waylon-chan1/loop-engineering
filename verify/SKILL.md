@@ -49,7 +49,8 @@ Compare the diff's changed-file list against the build list's `Files:` lines (pl
 
 Unless invoked `no-chain`, append a `## Chain log` line and spawn **one** successor per the outcome:
 
-- **All PASS, no USER items** → Status `verified-local`; spawn an agent to open the PR and run `{review_skill}`. **That agent writes the plan's reviewer-facing rendering into the PR description** (LIFECYCLE.md § The artifact) — criteria with verdicts and evidence, deviations, companion repos and deploy order, NOT-in-scope with routing — and confirms the plan document itself is absent from the diff. It stops when the PR is merge-ready; merging is the human's.
+- **All PASS/CHANGED, no USER items** → Status `verified-local`; spawn an agent to run the **review-loop skill** (it opens the PR, publishes the reviewer-facing rendering, and drives comment adjudication to merge-ready; merging is the human's).
+- **Only BLOCKED verdicts remain** (every criterion PASS/CHANGED except items needing environment/credentials/data you cannot obtain) → Status stays `built`; no successor. Report each BLOCKED item with the exact manual check that would discharge it — a PR must not open with unadjudicated criteria.
 - **Any FAIL** (within the 2-round repair cap) → Status stays `built`; spawn a build agent in repair mode with the failing criteria and their evidence attached. Verify never fixes code — not even the one-liner; grading and repairing in one context is the failure this skill exists to prevent.
 - **FAIL past the repair cap, or any USER verdict, or a tamper finding** → no successor. Stop and report to your spawner — the user at the root, your parent agent when nested (a USER verdict always ends up with the human, since only they can discharge it). Three failures against one criterion is evidence about the criterion, not about the code; a USER item is by definition not yours to discharge.
 

@@ -3,9 +3,9 @@
 The `plan-loop`, `build`, `verify`, and `retro` skills implement one development lifecycle (the `plan-loop` skill owns the stage named `plan` — the skill name avoids colliding with built-in plan mode):
 
 ```
-plan-loop A ── gate 1 ──▶ plan-loop B ── gate 2 ──▶ build ──▶ diff audit ──▶ verify ──▶ PR ──▶ review ──▶ merge ──▶ retro
-   (criteria)                (build plan)              (TDD)     ({diff_audit_    (fresh                 ({review_
-                                                                    skill})         eyes)                   skill})
+plan-loop A ── gate 1 ──▶ plan-loop B ── gate 2 ──▶ build ──▶ diff audit ──▶ verify ──▶ review-loop ──▶ merge ──▶ retro
+   (criteria)                (build plan)              (TDD)     ({diff_audit_    (fresh      (PR + comment
+                                                                    skill})         eyes)      adjudication)
 ```
 
 This file is the contract those skills share: the artifact, the status machine, the gates, the deviation classes, the adapter that binds the process to a repository, and the procedure for iterating on the system itself. Skills reference this file instead of restating it. If a skill's text conflicts with this file, this file wins.
@@ -37,6 +37,7 @@ Section ownership and mutability:
 | Header `Parent:` — the parent plan, on nested lifecycles only | plan-loop of the inner lifecycle | set once |
 | `## Companion repos` — repo, why, planned change, criteria served, deploy order | plan-loop Stage B (Stage A if criteria span repos) | gated at gate 2; a repo not listed here may not be written to |
 | `## Verification evidence` — verdict + evidence per criterion | verify | verify only |
+| `## Review tally` — comment → source → class → verdict → outcome | review-loop | append-only; retro's primary review-stage input |
 
 **Frozen is a checkable property, not an honor rule.** Frozen sections change only by appending a dated supersession banner (`> **YYYY-MM-DD revision:** …`) above the superseded text, never by in-place rewrites — and criteria banners additionally require the user's explicit approval. Every gate approval and every section handoff is a commit **in the plan store**, so `verify` diffs the criteria section against its state at the gate-1 commit there; any unbannered change is a headline finding. Moving plans out of the product repo doesn't weaken this — the enforcing history just lives in the store instead.
 
@@ -44,7 +45,7 @@ Section ownership and mutability:
 
 ## Status machine
 
-`planning → criteria-approved → plan-approved → building → built → verified-local → merged → closed` (any state may move to `abandoned`).
+`planning → criteria-approved → plan-approved → building → built → verified-local → in-review → merged → closed` (any state may move to `abandoned`).
 
 Each skill refuses to start from the wrong status and says which command the task actually needs:
 
@@ -55,7 +56,8 @@ Each skill refuses to start from the wrong status and says which command the tas
 | `plan-approved` | `build` |
 | `building` | `build` (resume) |
 | `built` | diff audit, then `verify` |
-| `verified-local` | open the PR; then the review skill |
+| `verified-local` | `review-loop` (opens the PR, sets `in-review`) |
+| `in-review` | `review-loop` (poll, adjudicate, fix; sets `merged` when the merge is observed) |
 | `merged` | `retro` (sets `closed` when done — this is what makes the autonomous sweep idempotent) |
 | `closed` | nothing — the task is complete |
 
@@ -239,7 +241,8 @@ The four skills carry zero repository facts. Every repo-specific value is an **a
 | `{regen_artifacts}` | Generated files that must be regenerated on behavior change, and their commands |
 | `{followup_routing}` | Where out-of-scope work goes, and the entry format |
 | `{diff_audit_skill}` | The pre-PR self-audit to run after build (if the repo has one) |
-| `{review_skill}` | The PR-comment adjudication skill (if the repo has one) |
+| `{review_skill}` | Repo-specific review supplement (extra adjudication gates, bot etiquette) loaded by review-loop, which drives the post-PR stage either way |
+| `{reviewer_ledger}` | Private per-reviewer preference notes (person-specific — more private than the adapter; never in the engine, the tracker, or any public surface). review-loop reads it to pre-empt and appends corroborated preferences; plan-loop and build may read it when shaping reviewer-visible output |
 | `{tracker_location}` | Where the lesson tracker lives |
 | `{invariants}` | Facts that must never be re-derived wrong |
 | `{companion_repos}` | Repositories this one's behavior spans: local clone path, forge slug, the relationship (who produces, who consumes), and the usual deploy order |
