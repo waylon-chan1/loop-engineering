@@ -1,1 +1,27 @@
+# This repository is public and lives at ~/.claude/skills, where any user-level
+# skill also lands. So the default is exclude-everything: a file joins the public
+# engine deliberately, never by being in the directory.
+*
+
+!.gitignore
+!README.md
+!LICENSE
+
+!lifecycle/
+!lifecycle/LIFECYCLE.md
+!lifecycle/contexts.example/
+!lifecycle/contexts.example/*.md
+
+!plan-loop/
+!plan-loop/SKILL.md
+!build/
+!build/SKILL.md
+!verify/
+!verify/SKILL.md
+!retro/
+!retro/SKILL.md
+
+# Private by construction. Real adapters carry internal hostnames, tracker ids,
+# and product facts; run logs carry whatever a run touched. Neither is engine.
+lifecycle/contexts/
 lifecycle/logs/
