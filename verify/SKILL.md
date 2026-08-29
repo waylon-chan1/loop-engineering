@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Adjudicate a built lifecycle task against its frozen acceptance criteria with fresh eyes — re-run every spec yourself, exercise manual criteria against the running app, check the criteria weren't tampered with, and issue PASS/FAIL/BLOCKED/USER per criterion without fixing anything. Use when a lifecycle plan doc has Status built, after the diff audit.
+description: Adjudicate a built lifecycle task against its frozen acceptance criteria with fresh eyes — re-run every spec yourself, exercise manual criteria against the running app, check the criteria weren't tampered with, and issue PASS/CHANGED/FAIL/BLOCKED/USER per criterion without fixing anything. Use when a lifecycle plan doc has Status built, after the diff audit.
 ---
 
 # verify — fresh-eyes adjudication against the contract
@@ -31,12 +31,18 @@ Diff the `## Acceptance criteria` section against its state at the gate-1 approv
 
 **Regression:** the full suite already ran above; additionally spot-check the plan's `## Failure Modes` table — each row's Test must exist and pass — and probe the nearest untouched behavior adjacent to the change.
 
+## 2b. Scope-drift check
+
+Compare the diff's changed-file list against the build list's `Files:` lines (plus `{regen_artifacts}` outputs). Files changed that no task names are **"while-I-was-in-there" findings** — report each; unplanned scope is a finding even when the code is good.
+
 ## 3. Verdicts
 
-**PASS / FAIL / BLOCKED / USER** per criterion.
+**PASS / CHANGED / FAIL / BLOCKED / USER** per criterion.
 
 - PASS requires reproducible evidence recorded in `## Verification evidence`: exact command + observed output. **No evidence = FAIL, not PASS.** Uncertainty resolves downward.
-- BLOCKED names precisely what's missing (environment, credentials, data) and what would unblock it.
+- **CHANGED** = the criterion is satisfied, but by different means than the plan described — and a `## Deviations` entry covers the difference. Same evidence bar as PASS. An equivalent-but-different implementation with a logged deviation is CHANGED, not FAIL and not tampering; the same difference with **no** logged deviation is a silent-deviation finding.
+- Postures: **be conservative with PASS** — a file being touched is not evidence; code that *handles* a deliverable is not the deliverable. **Be generous with CHANGED** — the goal is what was promised, not the route. **Be honest with BLOCKED** — name precisely what's missing and the exact manual check that would discharge it; "I don't want to check" is not BLOCKED.
+- **Evidence gate on FAIL:** a FAIL must quote what motivates it — the failing command and its output, or file:line and the verbatim text. A failure you cannot quote is a suspicion: it goes in a report appendix, never a verdict, and is not permitted to trigger the repair loop.
 - Any FAIL or USER verdict is the **first line of the report**, never buried below the passes.
 
 ## 4. Route the outcome (the chain's branch point)
@@ -54,6 +60,8 @@ Unless invoked `no-chain`, append a `## Chain log` line and spawn **one** succes
 - **Never fix what you find.** Grading and repairing in one context recreates the self-grading this skill exists to break.
 - **Never mark USER items PASS**, and never bury them — surface each with its specific question.
 - **Never skip the tamper check.** It is the only enforcement the criteria freeze has.
+
+**Observations:** friction during adjudication — a criterion that was hard to interpret, evidence that was hard to obtain, tooling gaps — gets one dated, stage-tagged, factual line in `## Observations`. Check once before reporting: anything observed, not yet logged? Zero is fine; skipping the check is not.
 
 ## Report
 

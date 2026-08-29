@@ -20,7 +20,18 @@ The output is one plan document in the plan store `{plan_store}`, named per `{pl
 
 ## 1. Stage A — frame
 
-### 1a. Ingest and verify
+### 1a-0. Classify the tier
+
+Classify the task per LIFECYCLE.md § Work classification — complexity first, size only as a smell — and record `Tier:` in the header with one line of reasoning. The tier decides everything downstream: patch = small-mode doc and one combined gate; feature = two gates + outside voice; deep = feature plus mandatory Alternatives and Failure Modes. Present the classification at the first gate for confirmation, raise any tier concern exactly once there, then execute the confirmed tier faithfully.
+
+### 1a. Ingest and verify — and interrogate
+
+**Push back before you frame.** The most expensive planning failure is faithfully framing the wrong request:
+
+- **Premise challenge:** is this the right problem, or a proxy for it? What actually happens if we do nothing? The Problem section must answer both in a sentence — if "nothing" costs nothing, say so at the gate.
+- **Claimed limitations need evidence:** "the API can't", "X requires Y", "that's impossible here" are material claims. State one only with the verbatim error, the documented statement, or a live probe in hand — and run the cheap probe *before* declaring anything blocked. Pattern-matching a failure to a familiar story is not evidence.
+- **Take a position.** Banned: "that's an interesting approach", "there are many ways to think about this", "you might want to consider…", "that could work." Instead: this works / this is wrong, because X — and state what evidence would change your mind. Challenge the strongest version of the request, never a strawman.
+- **And don't be stubborn about it.** The user has context you don't — domain, timing, taste. Your pushback is a recommendation, not a decision. Raise each concern once, well; if the user decides the other way, execute their call faithfully and never re-argue it. Disagreements you'd overturn their stated direction with are **Challenge** decisions (LIFECYCLE.md § Gates): fixed template, their direction is the default, you make the case.
 
 Read the task description. Then verify every factual claim in it against the code — docs, tickets, and the description itself are dated evidence, not truth. A claim you can't confirm with a file:line becomes an open question, not an assumption. Explore enough of the codebase to know what already exists: the feature may be half-built, the bug may be upstream of where it was reported, the "missing" behavior may be intentional.
 
@@ -35,7 +46,9 @@ Create the plan doc in `{plan_store}` with header (`Generated:` / `Repo:` / `Bra
 - `## NOT in scope` — name the tempting overreaches explicitly (the migration you won't run, the refactor you won't do, the adjacent bug you won't fix). Anything real routes per `{followup_routing}` under the impact bar (LIFECYCLE.md § Routing).
 - `## Open questions` — anything unresolved. These block gate 1.
 
-Small mode (contained bugfix): Problem, Acceptance criteria, Build list, Failure Modes only. Say which mode you chose; the user can override.
+Patch tier: small-mode doc (Problem, Acceptance criteria, Build list, Failure Modes only) and **Stage A and B are written in one pass, presented at one combined gate** — criteria and build list together, approved together, Status straight to `plan-approved`. Cement the plan, fire away.
+
+Deep tier additionally requires `## Alternatives` in Stage A: 2–3 genuinely distinct approaches, one minimal-viable and one ideal, **equal weight** — don't default to minimal because it's smaller; the choice is the approver's.
 
 ### 1c. Criteria audit — ordered, per criterion
 
@@ -48,7 +61,7 @@ Verdicts per criterion: **pass / rewrite / drop**. Only passing criteria reach t
 
 ### 1d. Gate 1
 
-Present the criteria (and open questions, resolved or explicitly deferred) to **your approver** — the user if this is the root lifecycle, your parent agent if you were spawned for a companion repo. Root: **stop and end the turn**; approval must be the user's own words, never inferred. Nested: hand them to the parent and continue when it approves. On approval: set Status `criteria-approved` and **commit the doc in the plan store** — that commit is the freeze's anchor, the one verify later diffs against. The criteria section is now frozen (LIFECYCLE.md § The artifact); from here on it changes only by a dated banner the user approves.
+Present the criteria to **your approver**; anything needing their judgment — open questions, taste decisions, outside-voice findings, tier concerns — goes as a decision brief (LIFECYCLE.md § Gates: stakes, recommendation with reason, pros/cons, one issue per question). The approver is the user if this is the root lifecycle, your parent agent if you were spawned for a companion repo. Root: **stop and end the turn**; approval must be the user's own words, never inferred. Nested: hand them to the parent and continue when it approves. On approval: set Status `criteria-approved` and **commit the doc in the plan store** — that commit is the freeze's anchor, the one verify later diffs against. The criteria section is now frozen (LIFECYCLE.md § The artifact); from here on it changes only by a dated banner the user approves.
 
 ## 2. Stage B — blueprint
 
@@ -72,6 +85,10 @@ Explore for reuse before designing anything new: existing operations, models, he
 - Every criterion is covered by ≥1 task and ≥1 planned spec, or is explicitly `[manual]`/`[user]`-only with the reason stated.
 - Every companion repo listed is demanded by ≥1 criterion, and every cross-repo criterion names the repo that satisfies it. Gate 2 is where the user authorizes writing to another repository — say so explicitly when presenting, since it is the largest scope decision in the plan.
 
+### 2c-bis. Outside voice (feature and deep tiers)
+
+Before presenting gate 2, spawn **one cold-read subagent** that receives nothing but the plan document. Charter: *"Find how this plan fails. Wrong assumptions, missing failure modes, criteria that can't be verified, simpler routes to the same criteria. No compliments — just the problems, each with what motivates it."* Its findings are **informational until approved**: fold each into the gate as a decision brief — never silently adopt one, even when you agree with it, and if the approver keeps the current approach, do not re-argue. If the outside voice fails to run, say so at the gate: that is missing coverage, not a clean bill.
+
 ### 2d. Gate 2
 
 Present shape + build list to your approver. Root: **stop — end the turn.** Nested: hand them to the parent and continue when it approves. On approval: Status `plan-approved`, commit in the plan store.
@@ -81,6 +98,8 @@ Present shape + build list to your approver. Root: **stop — end the turn.** Ne
 Gate 2 approval opens the autonomous segment (LIFECYCLE.md § Chaining). Append a `## Chain log` line and spawn **one** subagent to run the build skill, passing the plan document's path, the instruction to build it, and the **root approved plan** (LIFECYCLE.md § Chaining). Pass nothing else — no exploration notes, no conclusions. Anything build needs belongs in the document, and discovering that it isn't there is a finding, not an inconvenience.
 
 Gate 1 never chains in the root lifecycle: Stage A ends by stopping for the user, full stop. A nested lifecycle continues through both of its gates once its parent approves.
+
+**Observations:** friction during planning — a doc that lied, a probe that surprised, tooling that fought you — gets one dated, stage-tagged, factual line in `## Observations` when it happens. Check once before each gate: anything observed, not yet logged? Zero is fine; skipping the check is not.
 
 ## Hard rules
 

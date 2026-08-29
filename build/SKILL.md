@@ -34,6 +34,10 @@ Task by task, in build-list order:
 
 After the last task: run `{regen_artifacts}` for any behavior change, then `{ci_command}` (or `{test_command}` + `{lint_command}`). Red anything → fix before proceeding; build never hands a red tree forward.
 
+**REGRESSION RULE — the one gate-free move.** When the work reveals that something which previously worked is broken by this diff, write the regression test immediately. No question, no gate, no deferral. When uncertain whether a breakage is a regression, err toward writing the test.
+
+**Test cull before handing off** (LIFECYCLE.md § Tests: scaffolding vs contract): scaffolding tests were free during the work; only contract tests ship. Keep a test iff it traces to an acceptance criterion, a Failure Modes row, a regression, or a boundary contract — and it could fail on a plausible regression, not only on a rewrite. Collapse near-duplicates into table-driven cases rather than deleting; when arguable, keep and flag. Cull the rest — they live on in branch history. This runs here even when the repo has its own `{diff_audit_skill}`; the audit then double-checks it.
+
 ## 2b. Companion repositories
 
 If the plan has a `## Companion repos` section, spawn **one agent per repo** to run a **complete nested lifecycle there** (LIFECYCLE.md § Cross-repository work) — after the working repo's tasks are green, or earlier if the plan's deploy order requires that side to lead.
@@ -58,7 +62,9 @@ The split: **structure needs the user; implementation belongs to the agent.**
 2. **Mechanical** — implementation-level divergence: naming, file placement, private structure, an equivalent query. Log it as `mechanical`, proceed without asking. These are yours to own; stopping for them is noise.
 3. **Scope-declined** — you discovered work no criterion demands: a new endpoint, migration, flag, abstraction, adjacent bug. **Never build it**, even when it's obviously good. Route it per `{followup_routing}` under the impact bar, log `scope-declined` with the routing link.
 
-No silent deviations. An empty `## Deviations` section is a claim that the plan held exactly — make it true or make it noisy.
+No silent deviations. An empty `## Deviations` section is a claim that the plan held exactly — make it true or make it noisy. (A logged `mechanical` deviation that still satisfies its criterion will adjudicate as CHANGED at verify — logging it is what makes the different route legitimate.)
+
+**Observations:** friction that isn't a deviation — ambiguous plan wording, missing tooling, a stale claim that cost time — gets one dated, stage-tagged, factual line in `## Observations` the moment you hit it. Before handing off, check once: anything observed and not yet logged? Zero is fine; skipping the check is not.
 
 ## 4. Wrap and hand off
 

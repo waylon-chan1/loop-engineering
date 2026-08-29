@@ -14,7 +14,8 @@ Retro is the mechanism that makes this a *loop*: it converts what actually happe
 - Plan doc Status `merged` (or invoked in sweep mode, below). Wrong status → name the correct command and stop.
 - A nested lifecycle (one with a `Parent:` header) is harvested **as its own task**, attributed to its own repo — its misses belong to the stage that made them there, not to the parent. Read the parent for the authorization context; don't merge the two records.
 - **Sweep mode** (the autonomous entry point, run on a schedule): list plan docs in `{plan_store}` with Status `merged` — the store spans repos, so use each doc's `Repo:` header to work in the right one — run this skill per doc, then the dead-rule audit. Setting `closed` at the end of each doc (step 5a) is what makes the sweep idempotent — a doc is never harvested twice.
-- Inputs to gather: the review skill's adjudication tally (finding → verdict → reason), the PR's thread history and commits, verify's report (FAILs, USER outcomes, tamper findings), the plan doc's `## Deviations`, and any human overrides during the run. If the local working copy is missing, the merged PR description holds the published plan — recover it with `gh pr view`.
+- Inputs to gather: the review skill's adjudication tally (finding → verdict → reason), the PR's thread history and commits, verify's report (FAILs, USER outcomes, tamper findings), and the plan doc's `## Deviations`, `## Observations` (the flight recorder every stage appended to), and any human overrides during the run.
+- **Harvest is unconditional.** This step always runs in full; "the run felt clean" is not a reason to skip it. Zero qualified lessons is the explicit line "No durable lessons from this task" — an empty result, never a skipped step. If the local working copy is missing, the merged PR description holds the published plan — recover it with `gh pr view`.
 
 ## 1. Qualify candidates — the bar, in full
 
@@ -38,15 +39,22 @@ Attribute each miss to the **earliest stage that could have prevented it** — t
 | Bad fix made because a bot said so; real finding wrongly dismissed | review |
 | Noise stored; real lesson missed | retro |
 
-## 3. Record
+## 3. Record — bucket, then count
 
-At `{tracker_location}`: **dedupe first** — a recurring lesson bumps `Times Seen` on the existing row (a real signal) rather than adding a duplicate (noise). New rows carry: Lesson, Stage, Outcome, Detail, Source, Task/PR, Times Seen = 1, Status `active`, Date. Tracker unreachable → put the qualified lessons in the report verbatim and stop there; never block on the tracker, never retry in a loop.
+At `{tracker_location}`, per LIFECYCLE.md § Lessons:
+
+- **Bucket by the controlled vocabulary, not by wording.** Same stage + same Class + same subject → the existing row; bump `Times Seen`. A candidate no class fits either gets an existing class stretched (say so) or — deliberately, reported as such — a new class.
+- **Times Seen counts distinct tasks.** All observations of one friction within this task bump the counter by exactly one, however many agents hit it.
+- Observations from `## Observations` follow the same bar as everything else: corroborated (verify FAIL, review fix, human commit, plan-error) → candidate; uncorroborated → dies with the task, unrecorded. That is the filter, not a loss.
+- New rows carry: Lesson, Stage, Class, Outcome, Detail, Source, **Repo**, Task/PR, Times Seen = 1, Status `active`, Date.
+- **Cap: ~10 active rows per stage.** At the cap, adding means merging or archiving first — pick the weakest-attested row and fold or retire it, noting where it went.
+- Tracker unreachable → put the qualified lessons in the report verbatim and stop there; never block on the tracker, never retry in a loop.
 
 ## 4. Graduate — changing the system itself
 
-Threshold: **Times Seen ≥ 3, or one severe miss** (shipped defect, bypassed gate). Then, per LIFECYCLE.md § Iterating:
+Threshold: **Times Seen ≥ 3 (distinct tasks), or one severe miss** (shipped defect, bypassed gate) — severity always outranks the counter. Then, per LIFECYCLE.md § Iterating:
 
-1. Decide the layer: repo fact → the adapter file; process flaw → the owning skill or LIFECYCLE.md.
+1. Decide the layer — and **the evidence's spread decides it, not judgment**: a lesson whose confirmations all come from one repo may only graduate into that repo's adapter (or conventions file), at any count. Only confirmation across ≥2 repos qualifies a lesson for engine text (the owning skill or LIFECYCLE.md). This is what keeps the engine plug-and-play: single-repo experience physically cannot reach it.
 2. **Contradiction check.** Before applying, test the lesson against what already stands: does it contradict an existing skill rule, `{conventions_files}`, or `{invariants}`? A contradiction is not a tiebreaker in the lesson's favor — it means either the rule is wrong or the feedback was bad, and that call goes to the user with both sides' evidence. Bad feedback that slipped past the qualification bar gets caught here, before it can rewrite a rule that was right.
 3. Make the **smallest edit that would have prevented the miss**. Skill edits happen between runs, never mid-run, and must cite the tracker rows demanding them — the same evidence rule the skills enforce on code.
 4. Commit in `~/.claude/skills` (it is a git repo), message citing the tracker row.
