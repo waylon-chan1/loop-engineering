@@ -37,6 +37,7 @@ Attribute each miss to the **earliest stage that could have prevented it** — t
 | Spec written to pass rather than to fail first; unplanned scope built; silent deviation | build |
 | Evidence accepted without re-derivation; USER item buried; regression missed | verify |
 | Bad fix made because a bot said so; real finding wrongly dismissed | review |
+| Change shipped against the tally's own verdict with no new evidence (`caved-without-evidence` — a bypassed control: severe, graduates immediately) | review |
 | Noise stored; real lesson missed | retro |
 
 ## 3. Record — bucket, then count
