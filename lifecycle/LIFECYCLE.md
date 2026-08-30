@@ -210,6 +210,32 @@ The bar is mechanical on purpose — "critical to functionality" judged loosely 
 
 (Origin: the lifecycle's first live run shipped 2,241 test lines against ~830 hand-written source lines — 47 test files for 31 source files — because nothing separated the TDD harness from the deliverable.)
 
+## Claims and evidence — check, don't assume
+
+The most expensive failures in this system start identically: an agent believed something about how the code behaves, was wrong, and everything downstream inherited the error — criteria written for behavior that doesn't exist, defenses built for cases nothing reaches, escalations spending a human's attention on a question a one-minute probe would have closed. This section binds **every agent at every stage**, including spawned subagents that never run a skill.
+
+**Every load-bearing claim carries its basis.** A claim is load-bearing if it decides a criterion, a design, a verdict, a deviation, a stop, or an escalation. Each is exactly one of:
+
+- **verified** — you read it. Cite `file:line`.
+- **probed** — you ran it. Cite the exact command and its observed output.
+- **assumed** — neither, and therefore **not permitted to be load-bearing.** An assumed claim becomes a cheap probe, an open question, or a criterion. It never becomes a premise.
+
+**Run the cheap probe before asserting.** Before stating how anything behaves — an endpoint, a flag, a job, a library, a vendor, another repo — spend the minute it costs to look. Reading the source counts. Pattern-matching to a familiar story does not: *"it's Rails, so it must…"* is a hypothesis, and it is the most dangerous kind because it arrives feeling like knowledge.
+
+**Three sources of false certainty, all unverified until checked:**
+
+- **Stale truth** — docs, tickets, a memory, a previous session's note, an older plan's `What already exists`. True once; dated now.
+- **Inference** — the framework usually does X, this library normally does Y, the name says it does Z.
+- **Report** — another agent, a bot, a ticket, or the user said so. Trace it to whoever actually checked. If that trail ends at nobody, the claim is assumed.
+
+**A stop or an escalation states what was probed and what it showed.** A `plan-error`, a BLOCKED verdict, a raised question, "this is impossible here" — each names the check behind it. An escalation resting on an assumption is itself a finding: it spends the one resource the system is built to conserve.
+
+**Don't build for what you haven't shown is reachable.** A defense, a retry, or a failure-mode row for a case with no demonstrated path is overengineering wearing a safety argument. Show the path, or leave it out and say why.
+
+**Verified once stays verified until the ground moves.** Record it in `## What already exists (verified <date>)` with its evidence and reuse it freely — reuse is the entire point of writing it down. It expires on a rebase, a dependency bump, a vendor change, or a companion repo's deploy; whoever reads an older claim past one of those re-derives it.
+
+**Proportional, so this is discipline and not paralysis.** Effort scales with what the claim carries: naming a variable needs none, deciding an architecture needs a probe. When the probe is genuinely expensive, the claim goes to the gate as an open question — the one thing it may never do is pass silently as fact.
+
 ## Observations — the per-task flight recorder
 
 Every plan doc has an `## Observations` section any agent may append to, at any stage, the moment friction appears: one line, dated, stage-tagged, **factual only** — what happened plus an evidence pointer, never "we should change X." Noticing something off costs one line; then keep working.
