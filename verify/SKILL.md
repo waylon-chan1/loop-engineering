@@ -30,6 +30,8 @@ Diff the `## Acceptance criteria` section against its state at the gate-1 approv
 
 **Cross-repo criteria:** when the plan has `## Companion repos`, a criterion that spans repositories is discharged at the **boundary** — run the companion repo's relevant tests yourself (its adapter names the commands) and exercise the contract both sides depend on, rather than accepting either side's claim about the other. A nested lifecycle's own verify report is *its* evidence, not yours: the criterion cannot PASS until that inner lifecycle is merge-ready, and you confirm that from the forge, not from its summary. Confirm any dependency you were told already shipped by querying the forge, not by finding a file locally. State the deploy order's consequence explicitly: if only one side ships first, does the system stay correct? An unanswered version of that question is a FAIL, not a footnote.
 
+**Probe at the boundary your code owns.** To show that our code survives a dependency's failure, find where that dependency's own guarantees *end* — by reading its source — and inject there. A mock placed by guesswork tests the guess: mutating a library's internals usually proves only that the library handles its own errors, which is never what the criterion asked. When a criterion says "X still works when Y fails", the probe belongs at our call site, and the strongest version needs no stubbing at all.
+
 **Regression:** the full suite already ran above; additionally spot-check the plan's `## Failure Modes` table — each row's Test must exist and pass — and probe the nearest untouched behavior adjacent to the change.
 
 ## 2b. Scope-drift check
