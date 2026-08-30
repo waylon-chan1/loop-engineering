@@ -14,7 +14,8 @@ Verify exists because build cannot grade itself: the context that wrote the code
 - Plan doc Status must be `built` (run after the diff audit, since that mutates the diff — adjudicate what will actually ship). Wrong status → name the correct command and stop.
 - Fresh context, obtained without the user: if you implemented this task, or watched the repair that produced this state, **spawn a fresh subagent to adjudicate and let it report** — never ask the user to re-run verify in a new session. Freshness is the system's job to arrange, not a chore to hand to a human; a lifecycle that pauses for someone to open a terminal isn't autonomous. (In a chained run this holds automatically — verify always arrives newly spawned.)
 - Read `## Chain log` to learn which repair round this is, if any. **Every round gets a genuinely new verifier**: not the agent that issued the previous verdict, and not one that saw the repair being made. Repeat verification is spawned automatically by the repair loop and needs no human to start it.
-- **Re-verification covers every criterion, not just the repaired ones.** A fix aimed at one criterion routinely breaks another, and with no human watching the rounds, a narrowed re-check is how a regression reaches the PR wearing a PASS.
+- **Re-verify the repair's blast radius, not the whole contract** (LIFECYCLE.md § Re-verification scope). Run every `[spec]` criterion regardless — that is one command and it is what keeps the narrowing safe. Re-exercise only the `[manual]`/`[user]` criteria the change could have moved: those served by a build-list task whose `Files:` this round's diff touched, plus any whose evidence runs through code the diff changed. Compute that from the diff and the build list; if it can't be computed — no `Files:` lines, shared or global code, a config or dependency change — the radius is everything and you re-verify in full.
+- **Carry the rest forward, visibly.** A criterion outside the radius keeps its verdict, marked in `## Verification evidence` as carried from the round that derived it. Only a *previous verify agent's* recorded evidence may be carried, never build's claims, and only while its code stays untouched — a later diff reaching into it makes it re-derivable again.
 - `{workspace_bootstrap}` if needed.
 
 ## 1. Tamper check
@@ -56,7 +57,7 @@ Unless invoked `no-chain`, append a `## Chain log` line and spawn **one** succes
 
 ## Hard rules
 
-- **Never adjudicate from build's claims, logs, or memory.** Re-derive or it didn't happen.
+- **Never adjudicate from build's claims, logs, or memory.** Re-derive or it didn't happen. The single exception is a criterion carried forward from outside the blast radius, which rests on a previous *verifier's* recorded evidence plus its code being untouched — never on anything build reported.
 - **Never ask the user to run a verification for you.** If you need a clean context, spawn one. The only things that stop this chain are a USER verdict, a tamper finding, or the repair cap.
 - **Never fix what you find.** Grading and repairing in one context recreates the self-grading this skill exists to break.
 - **Never mark USER items PASS**, and never bury them — surface each with its specific question.
