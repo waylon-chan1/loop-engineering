@@ -12,7 +12,7 @@ This file is the contract those skills share: the artifact, the status machine, 
 
 ## The artifact
 
-One plan document per task, created by `plan-loop` Stage A. It is the lifecycle's entire cross-session state — any skill resumes from it in a fresh session by reading the Status line — and it exists in two places, with different jobs:
+One plan document per task, created by `plan-loop` Criteria Planning. It is the lifecycle's entire cross-session state — any skill resumes from it in a fresh session by reading the Status line — and it exists in two places, with different jobs:
 
 - **The working copy lives outside the product repository**, in the plan store at `{plan_store}` (a git repository of its own, holding plans for every repo). **Plan documents are never committed to the product repo** — they are process artifacts, not deliverables, and a repo's history should carry the change, not the paperwork that produced it. The store's own git history is what makes the criteria freeze enforceable and what lets a killed chain resume.
 - **The published copy is the pull request description**, written when the PR opens and refreshed if the plan changes. That is what reviewers read, and after merge it is the durable public record — recoverable with `gh pr view` even if the local store is gone.
@@ -28,15 +28,15 @@ Section ownership and mutability:
 | Header: `Generated:` / `Repo:` / `Branch:` / `Tier:` / `Status:` | plan creates; every skill updates Status only | Status is the one always-live line |
 | Header `PR:` — the pull request URL | review-loop, when it opens the PR | set once; it is how a later session or the sweep finds the PR to resolve state from |
 | `## Observations` — dated, stage-tagged facts (friction, surprises), one line each | any agent, any stage | append-only; facts never prescriptions |
-| `## Problem`, `## Decisions` (numbered) | plan Stage A | frozen; dated supersession banners only |
-| `## What already exists (verified <date>)` — every claim cited file:line | plan Stage A | build appends re-verification notes |
-| `## Acceptance criteria` — numbered, method-tagged, traced | plan Stage A | **frozen at gate 1**; changes only via a dated banner the user approved |
-| `## NOT in scope` — with routing for anything real | plan Stage A | append-only |
-| `## Shape`, `## Build list`, `## Failure Modes` | plan Stage B | build checks boxes; dated banners for structural change |
+| `## Problem`, `## Decisions` (numbered) | plan (Criteria Planning) | frozen; dated supersession banners only |
+| `## What already exists (verified <date>)` — every claim cited file:line | plan (Criteria Planning) | build appends re-verification notes |
+| `## Acceptance criteria` — numbered, method-tagged, traced | plan (Criteria Planning) | **frozen at gate 1**; changes only via a dated banner the user approved |
+| `## NOT in scope` — with routing for anything real | plan (Criteria Planning) | append-only |
+| `## Shape`, `## Build list`, `## Failure Modes` | plan (Build Planning) | build checks boxes; dated banners for structural change |
 | `## Deviations` — dated, classed | build | append-only |
 | `## Chain log` — one line per handoff | every skill that spawns a successor | append-only |
 | Header `Parent:` — the parent plan, on nested lifecycles only | plan-loop of the inner lifecycle | set once |
-| `## Companion repos` — repo, why, planned change, criteria served, deploy order | plan-loop Stage B (Stage A if criteria span repos) | gated at gate 2; a repo not listed here may not be written to |
+| `## Companion repos` — repo, why, planned change, criteria served, deploy order | plan-loop Build Planning (Criteria Planning if criteria span repos) | gated at gate 2; a repo not listed here may not be written to |
 | `## Verification evidence` — verdict + evidence per criterion | verify | verify only |
 | `## Review tally` — comment → source → class → verdict → outcome | review-loop | append-only; retro's primary review-stage input |
 
@@ -52,8 +52,8 @@ Each skill refuses to start from the wrong status and says which command the tas
 
 | Status | Only valid next actor |
 |---|---|
-| `planning` | `plan-loop` (Stage A, toward gate 1) |
-| `criteria-approved` | `plan-loop` (Stage B, toward gate 2) |
+| `planning` | `plan-loop` (Criteria Planning, toward gate 1) |
+| `criteria-approved` | `plan-loop` (Build Planning, toward gate 2) |
 | `plan-approved` | `build` |
 | `building` | `build` (resume) |
 | `built` | diff audit, then `verify` |
@@ -78,8 +78,8 @@ The chain is driven by the artifact, never by a parent's memory. Beyond those th
 
 | Stops after | Because |
 |---|---|
-| plan-loop Stage A | Gate 1 — the criteria need approval. **Root lifecycle: the user's.** Nested: the parent's, and the chain continues |
-| plan-loop Stage B | Gate 2 — the build plan needs approval. Same split as gate 1 |
+| plan-loop Criteria Planning | Gate 1 — the criteria need approval. **Root lifecycle: the user's.** Nested: the parent's, and the chain continues |
+| plan-loop Build Planning | Gate 2 — the build plan needs approval. Same split as gate 1 |
 | a `plan-error` that contradicts the **root** plan | the user's approved contract is void; only they can re-authorize. A plan-error that stays inside the root contract is resolved by the spawner and the chain continues |
 | verify FAIL past the repair cap | repeated failure means the plan or the criteria are wrong, not the code |
 | any verify USER verdict | only a human can discharge it |
@@ -162,7 +162,7 @@ Not every task deserves the same planning. `plan-loop` classifies the task at St
 |---|---|---|---|
 | **patch** | plug in context, cement the plan, fire away | zero complexity drivers AND ≤3 expected files AND no migration / new endpoint / flag / dependency AND the root cause or exact change is already understood (e.g. from a verify FAIL or review finding with evidence in hand) | small-mode doc; **one combined gate** — criteria and build list approved together; Status jumps `planning → plan-approved` |
 | **feature** | normal day-to-day work | at most one well-bounded complexity driver, and not deep | full doc; two gates; **outside voice before gate 2** |
-| **deep** | the ones that bite | any strong complexity driver — money/auth/PII behavior, migration on money tables, concurrency or idempotency semantics, new external integration, companion repos — or >15 files | feature process, plus a mandatory `## Alternatives` at Stage A (2–3 approaches including minimal-viable AND ideal, equal weight), and the Failure Modes registry is never optional |
+| **deep** | the ones that bite | any strong complexity driver — money/auth/PII behavior, migration on money tables, concurrency or idempotency semantics, new external integration, companion repos — or >15 files | feature process, plus a mandatory `## Alternatives` in Criteria Planning (2–3 approaches including minimal-viable AND ideal, equal weight), and the Failure Modes registry is never optional |
 
 - **Tie-break:** when size says patch and complexity says deep, complexity wins. When unsure, take the higher tier — over-planning a patch costs minutes; under-planning a race condition costs an incident.
 - **User overrides win, no question:** "just fix it" → patch; "go deep" / "be thorough" → deep. An override to patch does not silence the complexity drivers — they get one loud sentence at the gate, then the override stands.

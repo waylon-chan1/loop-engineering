@@ -32,7 +32,7 @@ An engineer prompting an agent starts from scratch every time. This is an attemp
 | Path | What it is |
 |---|---|
 | `lifecycle/LIFECYCLE.md` | The shared contract: artifact, status machine, gates, chaining and recursion bounds, deviation classes, adapter keys, the iteration procedure. If a skill contradicts it, it wins |
-| `plan-loop/SKILL.md` | Stage A frames the task into criteria (gate 1); Stage B scopes the implementation (gate 2) |
+| `plan-loop/SKILL.md` | Criteria Planning frames the task into criteria (gate 1); Build Planning scopes the implementation (gate 2) |
 | `build/SKILL.md` | Executes the approved plan test-first, logging every deviation; stops rather than improvising a redesign |
 | `verify/SKILL.md` | Fresh-eyes adjudication: PASS / CHANGED / FAIL / BLOCKED / USER, with evidence |
 | `review-loop/SKILL.md` | Opens the PR and adjudicates every review comment against the criteria contract — fixing what indicts it, pushing back with evidence on what doesn't |
