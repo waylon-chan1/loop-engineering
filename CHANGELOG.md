@@ -44,3 +44,9 @@ The tier rubric's structure, the pushback kit, decision briefs, the outside voic
 - **Verification is fresh by construction.** Verify is always a newly spawned agent that never saw the build, and re-verification after a repair covers every criterion, because a fix that breaks a neighbouring criterion is exactly what an unattended loop would otherwise carry to the PR.
 - **Reports are plain English.** Point first, concrete nouns, failures before passes, and none of the system's own vocabulary.
 - **Autonomous improvement, with a boundary.** Retro applies qualifying graduations itself and reports after the fact, but may never autonomously weaken the gates, the criteria freeze, the qualification bar, or the boundary itself. A self-improving system's most likely catastrophic improvement is optimizing away its own oversight.
+
+## 2026-09-01
+- Adapter (divvy): review-round fixes that touch migrations/schema now hit a mechanical Class-B
+  stop (`git diff --stat` for `db/migrate/`) instead of a judgment-based driver test. Evidence
+  class: a bypassed escalation control, confirmed on two consecutive tasks by approver reversals
+  of review-added schema.
