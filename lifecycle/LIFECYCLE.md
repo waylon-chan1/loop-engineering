@@ -109,6 +109,8 @@ Read those from the forge rather than inferring them (`gh pr view <n> --repo <or
 
 **Freshness holds by construction.** Every verify is a newly spawned agent that has not seen build's transcript. No skill may ever verify work it performed — spawning satisfies this automatically, which is why verify is never invoked inline by build.
 
+**Single-flight per stage per repo.** A stage owns its repo's working tree while it runs, and two agents in one tree is a defect, not a race worth tolerating. Before spawning any agent into a repo, and before grading a diff, establish that no other agent already owns that tree — and note what "idle" does and does not tell you: **no durable artifact distinguishes a working agent from a wedged one**, because Status advances only at the *end* of a stage. A completion notification, an unadvanced Status, and a missing output section are each equally consistent with a successor still running. So resolve ownership by asking the agent or its spawner, never by inferring death from silence; if you cannot establish it, wait rather than spawn. A grading stage additionally **records the commit it graded** and re-derives if the tree moves under it, so a verdict is always attributable to a specific diff.
+
 **Runaway control.** Each skill spawns **at most one** chain successor, plus one nested lifecycle per companion repo the plan names (§ Cross-repository work — bounded to depth 1, no repo twice in a lineage). Every hop appends a line to `## Chain log` in the plan document: timestamp, from → to, and why. A skill whose hop would push the log past **12 entries** stops and reports instead. A lifecycle that has taken twelve hops is malfunctioning, not working hard.
 
 ## Cross-repository work
@@ -221,6 +223,8 @@ The most expensive failures in this system start identically: an agent believed 
 - **assumed** — neither, and therefore **not permitted to be load-bearing.** An assumed claim becomes a cheap probe, an open question, or a criterion. It never becomes a premise.
 
 **Run the cheap probe before asserting.** Before stating how anything behaves — an endpoint, a flag, a job, a library, a vendor, another repo — spend the minute it costs to look. Reading the source counts. Pattern-matching to a familiar story does not: *"it's Rails, so it must…"* is a hypothesis, and it is the most dangerous kind because it arrives feeling like knowledge.
+
+**An edit is a claim, and applying it is not the same as it having landed.** A search-and-replace whose anchor is non-unique hits the wrong occurrence; one whose target a formatter has reflowed matches nothing and silently no-ops. Either way the tool reports success and every check that follows measures the unedited file — so a mutation check, a suite run, or a status transition can all come back "confirming" work that was never applied. After any replace, re-read the target and confirm the change is present before running anything that depends on it, and prefer an anchor you have shown to be unique. This is not defensive; it is the difference between evidence and its appearance.
 
 **Three sources of false certainty, all unverified until checked:**
 
