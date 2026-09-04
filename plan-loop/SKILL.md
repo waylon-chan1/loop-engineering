@@ -39,14 +39,15 @@ Read the task description. Then verify every factual claim in it against the cod
 
 Create the plan doc in `{plan_store}` with header (`Generated:` / `Repo:` / `Branch:` / `Status: planning`) — the repo line matters because the store spans repositories — and:
 
+- `## How it works` — the feature in plain language, **one line per step**, in the order the person living through it experiences them, opening with one line naming **who that person is**: a member, an admin operator, an on-call engineer reading an alert, the next job downstream. Most work here has no member in the flow at all, and an overview written as though it does is fiction. Name each step so it reads without naming a class — "taps Continue and sees the terms" passes, "the activity validates eligibility" does not. This is a **reading aid, not a second contract**: the criteria are the contract, and prose that disagrees with them is a defect to settle at the gate, never a tiebreaker to invoke later. It is the one frame section that stays revisable without a banner.
 - `## Problem` — what is wrong or missing, for whom, with evidence pointers.
 - `## Decisions` — numbered, settled choices, each with its reason. Decisions that belong to the user (product behavior, money, legal) are asked, not made.
 - `## What already exists (verified <date>)` — every claim cited file:line. This section is what Build Planning and build stand on; an unverified claim here is a planted `plan-error`.
-- `## Acceptance criteria` — numbered, each one: an **assertable behavior statement** an outside observer could watch fail, method-tagged `[spec]` / `[manual]` / `[user]`, and traced to a decision or failure mode.
+- `## Acceptance criteria` — numbered, each one: an **assertable behavior statement** an outside observer could watch fail, method-tagged `[spec]` / `[manual]` / `[user]`, and traced to a decision or failure mode. **Group them under the `## How it works` step they constrain**, with a final `Cross-cutting` group for the ones that hold at every step (idempotency, never persisting raw PII, the error envelope, an invariant) — force-fitting those into one step is how they get verified once instead of everywhere. **Numbering runs flat across all groups**, 1..N: a criterion number is the vocabulary verify, review adjudication, and the tally all speak, so it must never restart per group. A step with no criteria under it is a coverage question to answer at the gate, not a gap to leave silent.
 - `## NOT in scope` — name the tempting overreaches explicitly (the migration you won't run, the refactor you won't do, the adjacent bug you won't fix). Anything real routes per `{followup_routing}` under the impact bar (LIFECYCLE.md § Routing).
 - `## Open questions` — anything unresolved. These block gate 1.
 
-Patch tier: small-mode doc (Problem, Acceptance criteria, Build list, Failure Modes only) and **Criteria Planning and Build Planning are written in one pass, presented at one combined gate** — criteria and build list together, approved together, Status straight to `plan-approved`. Cement the plan, fire away.
+Patch tier: small-mode doc (Problem, Acceptance criteria, Build list, Failure Modes only — no overview; a one-line fix has no flow to narrate) and **Criteria Planning and Build Planning are written in one pass, presented at one combined gate** — criteria and build list together, approved together, Status straight to `plan-approved`. Cement the plan, fire away.
 
 Deep tier additionally requires `## Alternatives` in Criteria Planning: 2–3 genuinely distinct approaches, one minimal-viable and one ideal, **equal weight** — don't default to minimal because it's smaller; the choice is the approver's.
 
@@ -56,6 +57,7 @@ Deep tier additionally requires `## Alternatives` in Criteria Planning: 2–3 ge
 2. **External?** It must describe behavior visible from outside the implementation. "Uses a service object" cannot fail from outside; "a denied applicant receives an X response within one request" can.
 3. **Method-tagged?** `[spec]` — provable by an automated test; `[manual]` — needs the running app exercised; `[user]` — only a human can discharge it (visual judgment, legal/product signoff, external-system behavior). A criterion can carry more than one tag.
 4. **Traced?** It answers to a decision or a failure mode. An orphan criterion is scope creep wearing a checklist item.
+5. **Placed?** It sits under the step it constrains, or under `Cross-cutting` deliberately. A criterion that fits no step means either the step is missing from the overview or the criterion belongs to work this task doesn't own — both are gate questions.
 
 Verdicts per criterion: **pass / rewrite / drop**. Only passing criteria reach the gate.
 

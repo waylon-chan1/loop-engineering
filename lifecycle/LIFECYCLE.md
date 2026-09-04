@@ -19,7 +19,7 @@ One plan document per task, created by `plan-loop` Criteria Planning. It is the 
 
 Filenames follow `{plan_naming}`. Since the store spans repositories, each document's header names the repo and branch it belongs to.
 
-The PR description carries the **reviewer-facing rendering**: Problem, Decisions, Acceptance criteria with their verdicts and evidence, Deviations, Companion repos with deploy order, and NOT-in-scope with routing. Exploration notes and scratch stay in the working copy. The test is whether a reviewer needs anything beyond the PR to judge the change; if they do, the rendering is too thin.
+The PR description carries the **reviewer-facing rendering**, and it **opens with `## How it works`** — a reviewer who has to reconstruct the feature from numbered assertions is being charged for the plan's structure. Then: Problem, Decisions, Acceptance criteria with their verdicts and evidence grouped by step, Deviations, Companion repos with deploy order, and NOT-in-scope with routing. Exploration notes and scratch stay in the working copy. The test is whether a reviewer needs anything beyond the PR to judge the change; if they do, the rendering is too thin.
 
 Section ownership and mutability:
 
@@ -28,9 +28,10 @@ Section ownership and mutability:
 | Header: `Generated:` / `Repo:` / `Branch:` / `Tier:` / `Status:` | plan creates; every skill updates Status only | Status is the one always-live line |
 | Header `PR:` — the pull request URL | review-loop, when it opens the PR | set once; it is how a later session or the sweep finds the PR to resolve state from |
 | `## Observations` — dated, stage-tagged facts (friction, surprises), one line each | any agent, any stage | append-only; facts never prescriptions |
+| `## How it works` — who experiences the feature, then one line per step of the flow | plan (Criteria Planning) | a reading aid, never the contract; revisable without a banner |
 | `## Problem`, `## Decisions` (numbered) | plan (Criteria Planning) | frozen; dated supersession banners only |
 | `## What already exists (verified <date>)` — every claim cited file:line | plan (Criteria Planning) | build appends re-verification notes |
-| `## Acceptance criteria` — numbered, method-tagged, traced | plan (Criteria Planning) | **frozen at gate 1**; changes only via a dated banner the user approved |
+| `## Acceptance criteria` — numbered flat 1..N, method-tagged, traced, grouped under the step each constrains | plan (Criteria Planning) | **frozen at gate 1**; changes only via a dated banner the user approved |
 | `## NOT in scope` — with routing for anything real | plan (Criteria Planning) | append-only |
 | `## Shape`, `## Build list`, `## Failure Modes` | plan (Build Planning) | build checks boxes; dated banners for structural change |
 | `## Deviations` — dated, classed | build | append-only |
