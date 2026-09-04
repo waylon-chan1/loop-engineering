@@ -74,7 +74,7 @@ An accepted comment is not a hotfix — it is a task with evidence in hand, whic
 
 - If mid-fix a complexity driver appears (the "small fix" touches money semantics, a race, a migration), the patch tier no longer holds — that is a Class-B reclassification, and the user decides.
 - A fix still contested by the same reviewer after 2 rounds → escalate; do not iterate indefinitely on one thread.
-- Push fixes in coherent commits; each re-arms the bots — fold the new round into the same tally rather than treating it as a fresh review.
+- **One push per round.** Adjudicate the whole batch first, fix every accepted finding in it, then push **once** and re-request review. Rounds track pushes, not defects: each push re-arms every bot against a diff it has already read, and a partial push made while the rest of the batch is still being adjudicated buys a full extra round for whatever was left behind. Fold each new round into the same tally rather than treating it as a fresh review.
 
 ## 5. Tally, learn, hand off
 
