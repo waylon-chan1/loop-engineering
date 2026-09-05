@@ -258,11 +258,15 @@ Real work discovered mid-lifecycle goes to the repo's follow-up channel (`{follo
 Every report a skill hands back to a human — verdicts, failures, deviations, raised questions, retro lessons — is written in **plain English, short, and to the point.** The reader is scanning; make the point findable in seconds.
 
 - **One line per finding, and the point comes first.** What is wrong or what happened, then where, then what it means. Not a narrative that arrives at the conclusion last.
+- **One sentence per point.** If a point needs a second sentence, it is two points. Twenty words is the ceiling — count them when a line feels long, and never stack three clauses or nest a parenthetical inside a dash.
+- **Expand every acronym and internal term on first use, or drop it.** This covers the product's own vocabulary, not only this contract's: write "the AML queue (money-laundering review)" once, or find plainer words.
 - **No internal vocabulary.** Say "the plan said X, the code actually does Y" instead of "gate 2 traceability divergence." Say "this needs you to look at it" instead of "USER verdict pending adjudication." The status words in this contract are for the documents; reports explain themselves to someone who has never read this file.
 - **Concrete over abstract.** Name the file, the command, the number, the exact thing that failed. "The refund spec fails: expected 500 cents, got 5000" beats "monetary assertion mismatch in the payments layer."
 - **Lead with what needs attention.** Failures, blocked items, and anything needing a decision go first — before passes, before summaries of work done. If everything passed, say that in one line and stop.
 - **No hedging and no padding.** Don't restate the task back, don't explain what you were about to do, don't soften a failure into a "consideration." If something is broken, say it is broken.
 - **Say what you want from the reader.** End with the decision needed or the next command — never leave them to infer whether they are being informed or asked.
+
+**Read it back before sending, as someone who was not in the run.** Any line you have to read twice gets split. Any word only an insider knows gets replaced. Any sentence that arrives at its point late gets reversed. This pass is not optional, and it is the only check a report gets.
 
 Length is not thoroughness. A report nobody finishes reading has failed no matter how complete it is.
 
