@@ -33,6 +33,7 @@ Section ownership and mutability:
 | `## What already exists (verified <date>)` — every claim cited file:line | plan (Criteria Planning) | build appends re-verification notes |
 | `## Acceptance criteria` — numbered flat 1..N, method-tagged, traced, grouped under the step each constrains | plan (Criteria Planning) | **frozen at gate 1**; changes only via a dated banner the user approved |
 | `## NOT in scope` — with routing for anything real | plan (Criteria Planning) | append-only |
+| `## Data model` — tables, columns and indexes with the query, frequency and measured cost behind each; present only when the change migrates | plan (Build Planning) | frozen at gate 2; dated banners for structural change |
 | `## Shape`, `## Build list`, `## Failure Modes` | plan (Build Planning) | build checks boxes; dated banners for structural change |
 | `## Deviations` — dated, classed | build | append-only |
 | `## Chain log` — one line per handoff | every skill that spawns a successor | append-only |

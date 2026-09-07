@@ -77,6 +77,7 @@ Explore for reuse before designing anything new: existing operations, models, he
 
 - `## Shape` — where the pieces go and why, in the repo's own idiom.
 - `## Build list` — ordered tasks, each with `Files:` (exact paths), `Specs:` (the examples to write, stated as behavior invariants — names and assertions, not code), `Verify:` (the exact focused command that proves this task), and `Criteria:` (which acceptance criteria this task serves).
+- `## Data model` — **only when the build list proposes a migration.** Schema is the least reversible thing in a change: code gets rewritten, a shipped column needs a migration to remove. Per table: whether it is new or altered, and its **current row count read from the database, never guessed** — a guessed count makes the lock analysis fiction. Then a column table (column, type, null, default, why it exists, **the criterion it serves**), an index table (index, the query it serves, **how often that query runs and where the number came from**, **the cost without it measured with `EXPLAIN` at the row count above**, and the write cost it adds on every insert), the write path (who writes, how often, in what transaction, under what lock), the lock the migration itself takes, and what removing this later costs. Close with **`Deliberately not added`**: each thing left out with the **observable signal** that would justify it — "the admin queue query exceeds 200ms" is a trip-wire, "traffic will grow" is a forecast and does not belong here. No projected load, no capacity planning, and no performance criterion unless a criterion already demanded one.
 - `## Companion repos` — only if the behavior genuinely spans repositories (`{companion_repos}` names the candidates). Per repo: which one, why it must change, the specific planned change, which criteria it serves, and the **deploy order** with what happens if only one side ships. Investigate those repos read-only while writing this — never assert what a client sends or a service returns without having looked. Omit the section entirely when the work is single-repo; inventing a companion change is the cross-repo form of overengineering, and it doubles the blast radius while doing it.
 - `## Failure Modes` — table: Failure | Handling | Test. This is the regression contract verify will hold.
 - `## Rollout` — only when deploy order, flags, or data changes make it non-trivial.
@@ -85,6 +86,7 @@ Explore for reuse before designing anything new: existing operations, models, he
 
 - Every build task cites ≥1 criterion. A task no criterion demands is the overengineering vector — cut it or take it to the user as a proposed criterion change.
 - Every criterion is covered by ≥1 task and ≥1 planned spec, or is explicitly `[manual]`/`[user]`-only with the reason stated.
+- Every column and index in `## Data model` earns its row. A column no criterion demands gets cut here, before it is built. An index that cannot fill its row — no named query, no sourced frequency, no measured cost without it — is a finding at gate 2, not a detail; it moves to `Deliberately not added` with the signal that would revive it.
 - Every companion repo listed is demanded by ≥1 criterion, and every cross-repo criterion names the repo that satisfies it. Gate 2 is where the user authorizes writing to another repository — say so explicitly when presenting, since it is the largest scope decision in the plan.
 
 ### 2c-bis. Outside voice (feature and deep tiers)
@@ -93,7 +95,7 @@ Before presenting gate 2, spawn **one cold-read subagent** that receives nothing
 
 ### 2d. Gate 2
 
-Present shape + build list to your approver. Root: **stop — end the turn.** Nested: hand them to the parent and continue when it approves. On approval: Status `plan-approved`, commit in the plan store.
+Present shape + build list to your approver, and **present `## Data model` explicitly when it exists** — schema is the hardest part of the plan to undo after it ships, so it gets named at the gate rather than left for the approver to find. Root: **stop — end the turn.** Nested: hand them to the parent and continue when it approves. On approval: Status `plan-approved`, commit in the plan store.
 
 ### 2e. Handoff (unless invoked `no-chain`)
 
