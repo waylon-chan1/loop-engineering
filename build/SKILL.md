@@ -22,7 +22,7 @@ Before any implementation code: scaffold the spec suite for the whole plan.
 
 - One spec or spec group per `[spec]`-tagged criterion, following each task's `Specs:` lines and the repo's own spec idiom.
 - Run them. **Every example must fail for the right reason** — the behavior is missing — not because of a typo'd setup, a missing factory, or a load error. A spec failing for the wrong reason proves nothing and will pass for the wrong reason later.
-- This failing suite is the executable form of the done-criteria. Commit it (or stage it distinctly) so the red state is on the record.
+- This failing suite is the executable form of the done-criteria. **Record the red state in the plan document** — the command and its failing output, verbatim — before writing any implementation. The branch is folded to a single commit before the PR opens (review-loop §1), so git will not preserve this; the document is the only place the proof that specs came first can survive.
 
 ## 2. Implement to green
 

@@ -19,6 +19,7 @@ The charter, in priority order: **the lifecycle optimizes for quality work; fast
 
 ## 1. Publish and arm
 
+- **Fold the branch to a single commit before opening the PR.** Everything the task produced — the failing suite, every build task, every nested patch lifecycle — becomes one commit whose subject is the conventional-commit subject that will land on the default branch. The branch history is scaffolding; the plan document and the PR description are the durable record.
 - Write the reviewer-facing rendering into the PR description (LIFECYCLE.md § The artifact): criteria with verdicts and evidence, deviations, companion repos and deploy order, NOT-in-scope with routing. Confirm the plan document itself is absent from the diff. The description is what makes every adjudication below citable: reviewers were shown the contract.
 - Record the PR url in the plan doc's `PR:` header and set Status `in-review`. Write the header before anything else can fail: it is the only handle a later session or the retro sweep has for resolving what happened to this PR.
 - Poll for review activity (new comments, reviews, check runs) on a sensible cadence; every fix pushed re-arms the bots, so expect rounds, not a batch.
@@ -74,7 +75,7 @@ An accepted comment is not a hotfix — it is a task with evidence in hand, whic
 
 - If mid-fix a complexity driver appears (the "small fix" touches money semantics, a race, a migration), the patch tier no longer holds — that is a Class-B reclassification, and the user decides.
 - A fix still contested by the same reviewer after 2 rounds → escalate; do not iterate indefinitely on one thread.
-- **One push per round.** Adjudicate the whole batch first, fix every accepted finding in it, then push **once** and re-request review. Rounds track pushes, not defects: each push re-arms every bot against a diff it has already read, and a partial push made while the rest of the batch is still being adjudicated buys a full extra round for whatever was left behind. Fold each new round into the same tally rather than treating it as a fresh review.
+- **One push per round, and the branch keeps exactly one commit.** Adjudicate the whole batch first, fix every accepted finding in it, fold the round's fixes back into that single commit, then push **once** with `--force-with-lease` and re-request review. Never a bare `--force`: with-lease refuses when the remote moved under you, which is the difference between rewriting your own work and silently discarding someone else's. Rounds track pushes, not defects: each push re-arms every bot against a diff it has already read, and a partial push made while the rest of the batch is still being adjudicated buys a full extra round for whatever was left behind. Fold each new round into the same tally rather than treating it as a fresh review.
 
 ## 5. Tally, learn, hand off
 
