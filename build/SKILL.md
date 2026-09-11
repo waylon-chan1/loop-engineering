@@ -40,6 +40,10 @@ After the last task: run `{regen_artifacts}` for any behavior change, then `{ci_
 
 **Test cull before handing off** (LIFECYCLE.md § Tests: scaffolding vs contract): scaffolding tests were free during the work; only contract tests ship. Keep a test iff it traces to an acceptance criterion, a Failure Modes row, a regression, or a boundary contract — and it could fail on a plausible regression, not only on a rewrite. Collapse near-duplicates into table-driven cases rather than deleting; when arguable, keep and flag. Cull the rest — they live on in branch history. This runs here even when the repo has its own `{diff_audit_skill}`; the audit then double-checks it.
 
+**Comment cull before handing off — the same pass, run over comments.** The plan document is a process artifact and must not leak into the product. **Grep the added lines of your own diff for lifecycle vocabulary and delete every hit**: "criterion", "acceptance criteria", "decision N", "task N", "build list", "failure mode", "gate", "the plan", "per the plan doc". These read as authority to the next agent while pointing at a file that repository will never contain, and they rot the moment the plan is superseded.
+
+Then hold what survives to one bar: **a comment exists to tell a future agent something the code cannot.** A non-obvious why, an authority pointer to the source that constrains this line, or a warning about a trap. Delete anything that explains *what* the code does — the code already says that, and a restated comment drifts into a lie the first time the code changes. When a comment feels necessary because the code is unclear, the fix is usually the name, the extraction, or the constant, not the sentence.
+
 ## 2b. Companion repositories
 
 If the plan has a `## Companion repos` section, spawn **one agent per repo** to run a **complete nested lifecycle there** (LIFECYCLE.md § Cross-repository work) — after the working repo's tasks are green, or earlier if the plan's deploy order requires that side to lead.
@@ -85,3 +89,4 @@ When spawned by verify with failing criteria: fix **only** those criteria, using
 - **Never write implementation before its spec exists and fails.** Test-after converges on testing what you built instead of what was promised.
 - **Never mark a task DONE with red or skipped specs.** DEVIATED-DONE still requires green — it flags *how*, not *whether*.
 - **Never build unplanned scope, however good the idea.** Route it. The backlog is where good ideas wait their turn; the diff is not.
+- **Never reference the plan document from shipped code.** Not in a comment, a commit message, a spec name, or a TODO. The plan lives outside the repository, so every such reference is a dangling pointer the next agent will trust.
