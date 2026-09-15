@@ -165,8 +165,8 @@ Not every task deserves the same planning. `plan-loop` classifies the task at St
 | Tier | What it is | Qualifies when | Process |
 |---|---|---|---|
 | **patch** | plug in context, cement the plan, fire away | zero complexity drivers AND ≤3 expected files AND no migration / new endpoint / flag / dependency AND the root cause or exact change is already understood (e.g. from a verify FAIL or review finding with evidence in hand) | small-mode doc; **one combined gate** — criteria and build list approved together; Status jumps `planning → plan-approved` |
-| **feature** | normal day-to-day work | at most one well-bounded complexity driver, and not deep | full doc; two gates; **outside voice before gate 2** |
-| **deep** | the ones that bite | any strong complexity driver — money/auth/PII behavior, migration on money tables, concurrency or idempotency semantics, new external integration, companion repos — or >15 files | feature process, plus a mandatory `## Alternatives` in Criteria Planning (2–3 approaches including minimal-viable AND ideal, equal weight), and the Failure Modes registry is never optional |
+| **feature** | normal day-to-day work | at most one well-bounded complexity driver, and not deep | full doc; two gates; **one outside voice before gate 2** (§ The outside voice) |
+| **deep** | the ones that bite | any strong complexity driver — money/auth/PII behavior, migration on money tables, concurrency or idempotency semantics, new external integration, companion repos — or >15 files | feature process, plus a mandatory `## Alternatives` in Criteria Planning (2–3 approaches including minimal-viable AND ideal, equal weight), the Failure Modes registry is never optional, and the outside voice runs as **two independent voices plus one rebuttal round** before gate 2 and again over verify's verdicts |
 
 - **Tie-break:** when size says patch and complexity says deep, complexity wins. When unsure, take the higher tier — over-planning a patch costs minutes; under-planning a race condition costs an incident.
 - **User overrides win, no question:** "just fix it" → patch; "go deep" / "be thorough" → deep. An override to patch does not silence the complexity drivers — they get one loud sentence at the gate, then the override stands.
@@ -190,6 +190,30 @@ A gate is passed only by the approver saying so in their own words (the user at 
 - **Mechanical** — one defensibly right answer. Decide silently; it is noise at a gate.
 - **Taste** — reasonable people could disagree. Decide it, but surface the decision at the gate so the approver can reverse it cheaply.
 - **Challenge** — the agent believes the approver's stated direction should change. **Never auto-decided.** Fixed template: *What you said / What we recommend / Why / What context we might be missing / If we're wrong, the cost is.* The approver's original direction is the default; the agent must make the case for change — and if the approver keeps their direction, do not re-argue.
+
+## The outside voice
+
+Work reviewed by the same model family that produced it inherits that family's blind spots. The outside voice is the seam where an **adversarial reader from a different model family** grades the artifact. `{outside_voice}` names the command; absent that key it degrades to a same-family subagent, which is weaker but not nothing.
+
+**Charter, always the same:** *"Find how this fails. Wrong assumptions, missing failure modes, criteria that can't be verified, simpler routes to the same criteria. No compliments — just the problems, each with what motivates it."*
+
+**Where it runs:** feature tier gets **one** voice before gate 2. Deep tier gets **two independent voices** — one per family — plus a single rebuttal round, and verify runs a second-opinion pass on its own verdicts.
+
+**Independence comes first.** Each voice receives only the artifact and the charter — never the other's findings, never its spawner's conclusions. Findings correlate the moment the voices can read each other, and two voices that agreed *independently* is the strongest signal this system produces. A conversation destroys the thing that made the agreement worth having.
+
+**One rebuttal round, then stop.** Once both have reported, each reads the other's findings once and may concede or rebut, with what motivates it. That round exists to kill false positives and one round does it. There is no second round and **no requirement to agree**: convergence is not a truth signal, it records which voice argued longer.
+
+**Three buckets, and all three are presented:**
+
+- **Corroborated** — both voices flagged it independently. The strongest finding class this system produces.
+- **Conceded** — one raised it and withdrew on rebuttal. One line each, not a brief.
+- **Disputed** — they still disagree after the rebuttal round. This is the highest-value output, not a loose end to tidy away: it reaches the approver as a decision brief carrying both positions and their evidence.
+
+**Findings are informational until approved.** Never silently adopt one, even when you agree with it. Fold it into the gate as a decision brief and let the approver rule; if they keep the current approach, do not re-argue.
+
+**The outside voice never writes.** It reads the artifact and reports — no edits to code, specs, or the plan. Run it in a read-only sandbox wherever the tool offers one, so the mechanism enforces this and not the prompt.
+
+**A voice that failed to run is missing coverage, never a clean bill.** Say so at the gate: which voice, and why. Silently dropping from two voices to one, or from a different family to the same one, is the exact failure this section exists to prevent.
 
 ## Deviation classes (build)
 
@@ -299,12 +323,13 @@ The four skills carry zero repository facts. Every repo-specific value is an **a
 | `{review_skill}` | Repo-specific review supplement (extra adjudication gates, bot etiquette) loaded by review-loop, which drives the post-PR stage either way |
 | `{reviewer_ledger}` | Private per-reviewer preference notes (person-specific — more private than the adapter; never in the engine, the tracker, or any public surface). review-loop reads it to pre-empt and appends corroborated preferences; plan-loop and build may read it when shaping reviewer-visible output |
 | `{tracker_location}` | Where the lesson tracker lives |
+| `{outside_voice}` | Command that runs an adversarial reader from a **different model family**, read-only and non-interactive (§ The outside voice). Absent → same-family subagent, reported as such |
 | `{invariants}` | Facts that must never be re-derived wrong |
 | `{companion_repos}` | Repositories this one's behavior spans: local clone path, forge slug, the relationship (who produces, who consumes), and the usual deploy order |
 
 **Resolution order:** (1) `.claude/lifecycle-context.md` in the repo, if present; (2) `~/.claude/skills/lifecycle/contexts/<repo>.md`, where `<repo>` is the basename of `git remote get-url origin`; (3) neither → run the bootstrap: infer candidates from the repo (README, CI config, `bin/`, `package.json`/`Gemfile`, AGENTS.md/CLAUDE.md), confirm them with the user, write the context file to location (2) for next time.
 
-**Missing keys degrade, they don't block.** No `{mint_test_state}` means manual verification says so and uses `{manual_probe}` from a cold start; no `{ci_command}` means run `{test_command}` + `{lint_command}` separately; no `{diff_audit_skill}` means build's own cull stands as the audit; no `{review_skill}` means review-loop runs the post-PR stage on its generic rules alone, since that stage has its own skill and the key only supplements it. A skill never invents tooling a key doesn't name.
+**Missing keys degrade, they don't block.** No `{mint_test_state}` means manual verification says so and uses `{manual_probe}` from a cold start; no `{ci_command}` means run `{test_command}` + `{lint_command}` separately; no `{diff_audit_skill}` means build's own cull stands as the audit; no `{review_skill}` means review-loop runs the post-PR stage on its generic rules alone, since that stage has its own skill and the key only supplements it; no `{outside_voice}` means the cold read still happens as a same-family subagent and every report that rests on it says so, because a cross-family review silently served by one family is a false claim of coverage. A skill never invents tooling a key doesn't name.
 
 ## Lessons and the tracker
 

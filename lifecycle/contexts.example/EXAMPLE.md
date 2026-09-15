@@ -25,6 +25,7 @@ Resolution order (LIFECYCLE.md § The adapter):
 | `{followup_routing}` | `TODO.md`, or the team's issue tracker — name the destination and the entry format |
 | `{diff_audit_skill}` | The repo's pre-PR self-audit skill, if it has one. Absent → build performs the generic cull inline |
 | `{review_skill}` | The repo's PR-comment adjudication skill, if it has one. Absent → the generic description applies |
+| `{outside_voice}` | A non-interactive, read-only command that runs an adversarial reader from a **different model family** than the agent running the lifecycle — e.g. another vendor's coding CLI in exec mode. It receives the artifact plus a charter on stdin or argv and prints findings. Environment fact rather than a repo fact, so it repeats across contexts; omit it and the cold read degrades to a same-family subagent, which every report then says out loud |
 | `{tracker_location}` | Where lesson rows live — a database, a checked-in CSV, anything queryable. Optional, never a dependency |
 | `{invariants}` | Facts no agent may re-derive wrong: money as integer cents, never log raw PII, every error response uses one envelope, seeds are idempotent |
 | `{companion_repos}` | See below. Omit the section when the repo's behavior spans nothing |

@@ -21,7 +21,7 @@ An engineer prompting an agent starts from scratch every time. This is an attemp
 
 **Whoever spawns an agent owns it.** Subagents answer to their spawner, not to the user. Every agent also receives the root approved plan, so it holds itself to the contract a human actually signed rather than guessing at intent. The user is reached by escalation only, and only for the one thing a spawner cannot decide: something that contradicts that contract.
 
-**Work is tiered by complexity, not size.** A two-file race-condition fix is `deep`; a twenty-file mechanical rename is not. `patch` collapses to one combined gate; `feature` adds a cold-read outside-voice review of the plan; `deep` requires alternatives and a failure-mode registry. Tier is confirmed at the first gate and then committed to.
+**Work is tiered by complexity, not size.** A two-file race-condition fix is `deep`; a twenty-file mechanical rename is not. `patch` collapses to one combined gate; `feature` adds a cold-read outside-voice review of the plan, preferably by a different model family; `deep` runs two independent voices with one rebuttal round, and requires alternatives and a failure-mode registry. Tier is confirmed at the first gate and then committed to.
 
 **Tests split into scaffolding and contract.** During build, tests are unlimited — red-green stepping stones are free and drive correctness. At PR time only tests tracing to a criterion, a failure mode, a regression, or a boundary contract survive. (This rule exists because the first live run shipped 2,241 test lines against ~830 source lines.)
 

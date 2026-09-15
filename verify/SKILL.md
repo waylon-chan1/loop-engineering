@@ -38,6 +38,14 @@ Diff the `## Acceptance criteria` section against its state at the gate-1 approv
 
 Compare the diff's changed-file list against the build list's `Files:` lines (plus `{regen_artifacts}` outputs). Files changed that no task names are **"while-I-was-in-there" findings** — report each; unplanned scope is a finding even when the code is good.
 
+## 2c. Second opinion (deep tier)
+
+Deep-tier verdicts get one adversarial re-read from a different model family — `{outside_voice}`, per LIFECYCLE.md § The outside voice. Send it the plan document, the diff, and your draft verdicts with their evidence. Charter narrows to: *which of these verdicts is wrong, and what evidence shows it.*
+
+**A verdict dispute is settled by re-running the command, never by argument.** This is the one stage where the outside voice's disagreement has ground truth underneath it — a spec is red or it is not — so resolve it there and record the run that resolved it. A dispute that survives the re-run is a real finding and reaches the report as one.
+
+It may not repair anything either; run it read-only, which makes this skill's no-fixing rule mechanical rather than a promise. If it could not be run, the report says the verdicts had a single adjudicator instead of implying two.
+
 ## 3. Verdicts
 
 **PASS / CHANGED / FAIL / BLOCKED / USER** per criterion.
@@ -71,6 +79,6 @@ Unless invoked `no-chain`, append a `## Chain log` line and spawn **one** succes
 
 Plain English, short, point first (LIFECYCLE.md § How findings are reported).
 
-Anything broken or needing you goes at the top, one line each: what failed, where, what it means. Then a compact table — criterion | what it checks | how checked | verdict | evidence. Then regression and tamper-check results in a line apiece, the Status change, and the next command.
+Anything broken or needing you goes at the top, one line each: what failed, where, what it means. Then a compact table — criterion | what it checks | how checked | verdict | evidence. Then regression and tamper-check results in a line apiece, the second opinion's outcome when deep tier called for one — corroborated, conceded, or still disputed — the Status change, and the next command.
 
 Write it for someone who has never read this contract: "criterion 3 fails — the API returns 200 with an empty body when it should return 422" rather than "criterion 3 FAIL, envelope conformance divergence." If everything passed, say so in one line and stop.

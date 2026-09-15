@@ -91,7 +91,12 @@ Explore for reuse before designing anything new: existing operations, models, he
 
 ### 2c-bis. Outside voice (feature and deep tiers)
 
-Before presenting gate 2, spawn **one cold-read subagent** that receives nothing but the plan document. Charter: *"Find how this plan fails. Wrong assumptions, missing failure modes, criteria that can't be verified, simpler routes to the same criteria. No compliments — just the problems, each with what motivates it."* Its findings are **informational until approved**: fold each into the gate as a decision brief — never silently adopt one, even when you agree with it, and if the approver keeps the current approach, do not re-argue. If the outside voice fails to run, say so at the gate: that is missing coverage, not a clean bill.
+Before presenting gate 2, run the outside voice over the plan document per LIFECYCLE.md § The outside voice — that section owns the charter, the independence rule, the rebuttal round, and the three buckets. What is specific to planning:
+
+- **Feature: one voice.** Prefer `{outside_voice}`, so the reader is a different model family than the one that wrote the plan. No key → a cold-read subagent, and the gate says the read was same-family.
+- **Deep: two voices, one per family, run independently**, then one rebuttal round. Present corroborated findings first, conceded findings as one line each, and every disputed finding as its own decision brief with both positions.
+- Each voice receives **nothing but the plan document** — no exploration notes, no "here's what I was thinking", no framing of which findings you expect. Priming the reader is how you get your own reasoning back with a second name on it.
+- Do not ask the voices to reach consensus, and do not adjudicate a dispute yourself by picking the more convincing argument. A plan-level disagreement is usually taste, which is the approver's call, not yours.
 
 ### 2d. Gate 2
 
