@@ -4,6 +4,10 @@ Engine changes only — what changed in the process, and what motivated it. Newe
 
 Two rules keep this file honest and publishable: an entry names the rule that changed and the *class* of evidence behind it, never the private task that surfaced it; and repository-specific facts never appear here, because they belong in an adapter, which is not part of this repository.
 
+## 2026-09-29
+
+- **A universal claim in a plan is verified member by member.** Criteria Planning already required every factual claim to be confirmed against the code, but a sentence quantifying over a set — "all N callers", "every path", "behavior unchanged" — was being confirmed by sampling two or three members and generalizing. Plan-loop's ingest step now requires the members to be named in the plan's evidence section: each call site, each entry point, and each side effect of the path being replaced. Evidence: a lesson at three independent confirmations across two repositories, spanning three axes of the same failure — instants inside one scheduled run, UI mount sites, and the side effects of a replaced payment path — each caught only by a bot, an outside voice, or the approver.
+
 ## 2026-09-25
 
 - **A per-member rule needs a per-member example that touches only its own member.** Build's red-first run proves an example fails while the code is absent, which every example does, so it cannot distinguish an example that pins its rule from one that would pass against a partial implementation. The shape that slipped through: examples for a rule applied per member (here, a freeze on each of several columns) that each also changed the sibling members to keep other constraints satisfied, so a mutant enforcing the rule for one member only stayed green on the rest. Build now requires each member's example to exercise only that member. Evidence: a lesson at five independent confirmations across two repositories that recurred after its first graduation, caught this time by the diff audit's mutation probe after build and its own red-first run had passed it.
