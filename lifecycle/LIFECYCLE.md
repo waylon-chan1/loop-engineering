@@ -255,7 +255,7 @@ The most expensive failures in this system start identically: an agent believed 
 **Three sources of false certainty, all unverified until checked:**
 
 - **Stale truth** — docs, tickets, a memory, a previous session's note, an older plan's `What already exists`. True once; dated now.
-- **Inference** — the framework usually does X, this library normally does Y, the name says it does Z.
+- **Inference** — the framework usually does X, this library normally does Y, the name says it does Z. **Including across layers of another system:** its backend says nothing about what its app does, a manifest says nothing about what its release pipeline ships, a server-side switch says nothing about how a client SDK caches the same flag. A claim about another system — a reference implementation you're matching, a client, a vendor, a build pipeline — is verified only at the layer that produces the behavior. A finding you concede to an outside voice is a claim too, and needs the same check before it enters the plan.
 - **Report** — another agent, a bot, a ticket, or the user said so. Trace it to whoever actually checked. If that trail ends at nobody, the claim is assumed.
 
 **A stop or an escalation states what was probed and what it showed.** A `plan-error`, a BLOCKED verdict, a raised question, "this is impossible here" — each names the check behind it. An escalation resting on an assumption is itself a finding: it spends the one resource the system is built to conserve.
