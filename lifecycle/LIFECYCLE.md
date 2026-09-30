@@ -193,7 +193,7 @@ A gate is passed only by the approver saying so in their own words (the user at 
 
 ## The outside voice
 
-Work reviewed by the same model family that produced it inherits that family's blind spots. The outside voice is the seam where an **adversarial reader from a different model family** grades the artifact. `{outside_voice}` names the command; absent that key it degrades to a same-family subagent, which is weaker but not nothing.
+Work reviewed by the same model family that produced it inherits that family's blind spots. The outside voice is the seam where an **adversarial reader from a different model family** grades the artifact. `{outside_voice}` names one command per family. **Each is pinned to an exact model version, never a floating alias** — this process depends on the two readers actually differing, and an alias that silently re-points is how two voices quietly become one. A family with no command reads as a plain subagent instead, which is weaker but not nothing.
 
 **Charter, always the same:** *"Find how this fails. Wrong assumptions, missing failure modes, criteria that can't be verified, simpler routes to the same criteria. No compliments — just the problems, each with what motivates it."*
 
@@ -323,7 +323,7 @@ The four skills carry zero repository facts. Every repo-specific value is an **a
 | `{review_skill}` | Repo-specific review supplement (extra adjudication gates, bot etiquette) loaded by review-loop, which drives the post-PR stage either way |
 | `{reviewer_ledger}` | Private per-reviewer preference notes (person-specific — more private than the adapter; never in the engine, the tracker, or any public surface). review-loop reads it to pre-empt and appends corroborated preferences; plan-loop and build may read it when shaping reviewer-visible output |
 | `{tracker_location}` | Where the lesson tracker lives |
-| `{outside_voice}` | Command that runs an adversarial reader from a **different model family**, read-only and non-interactive (§ The outside voice). Absent → same-family subagent, reported as such |
+| `{outside_voice}` | Command **per model family** that runs an adversarial reader, read-only and non-interactive, each pinned to an exact model version (§ The outside voice). No entry for a family → that family reads as a plain subagent, reported as such |
 | `{invariants}` | Facts that must never be re-derived wrong |
 | `{companion_repos}` | Repositories this one's behavior spans: local clone path, forge slug, the relationship (who produces, who consumes), and the usual deploy order |
 
