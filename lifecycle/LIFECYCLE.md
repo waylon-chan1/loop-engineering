@@ -82,7 +82,7 @@ The chain is driven by the artifact, never by a parent's memory. Beyond those th
 |---|---|
 | plan-loop Criteria Planning | Gate 1 — the criteria need approval. **Root lifecycle: the user's.** Nested: the parent's, and the chain continues |
 | plan-loop Build Planning | Gate 2 — the build plan needs approval. Same split as gate 1 |
-| a `plan-error` that contradicts the **root** plan | the user's approved contract is void; only they can re-authorize. A plan-error that stays inside the root contract is resolved by the spawner and the chain continues |
+| a `plan-error` that contradicts the **root** plan, changes what a frozen criterion accepts, or fills a gap the plan left | the user's approved contract is void or incomplete; only they can re-authorize. Any other plan-error that stays inside the root contract is resolved by the spawner and the chain continues |
 | verify FAIL past the repair cap | repeated failure means the plan or the criteria are wrong, not the code |
 | any verify USER verdict | only a human can discharge it |
 | a PR that is merge-ready | **the human merges, always.** Merging is outward-facing and irreversible in practice; no agent merges a PR under any circumstance |
@@ -221,8 +221,8 @@ The split: **structure needs the user; implementation belongs to the agent.**
 
 | Class | Meaning | Action |
 |---|---|---|
-| `mechanical` | Implementation-level divergence: naming, file placement, private structure, an equivalent query or API shape | Log it in `## Deviations`, proceed without asking — these are the agent's to own |
-| `plan-error` | Reality contradicts a plan claim in a way that invalidates a criterion, the architecture, or task ordering | Log it, **STOP**, return to the user. Never improvise a redesign mid-build |
+| `mechanical` | Implementation-level divergence: naming, file placement, private structure, an equivalent query or API shape. **Never** a change to what a frozen criterion accepts, and never work the plan left out — those are `plan-error`, however small | Log it in `## Deviations`, proceed without asking — these are the agent's to own |
+| `plan-error` | Reality contradicts a plan claim in a way that invalidates a criterion, the architecture, or task ordering — **or** the build would change what a frozen criterion accepts (widen, narrow or contradict it), **or** it needs work the plan left out (a file, task, spec or failure mode no build-list entry names) | Log it, **STOP**, return to the user. The last two kinds always reach the user — a spawner may not resolve them. The escalation opens with a plain catch-up that assumes no memory of the plan: what the plan said and why, what build found, what each option would do in concrete terms, and a recommendation. Never improvise a redesign mid-build |
 | `scope-declined` | Work discovered that no criterion demands (new feature, migration, flag, abstraction) | Never build it. Route it (below), log the routing |
 
 No silent deviations of any class. An empty Deviations section asserts the plan held exactly.
