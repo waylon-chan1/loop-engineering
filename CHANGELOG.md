@@ -4,6 +4,10 @@ Engine changes only — what changed in the process, and what motivated it. Newe
 
 Two rules keep this file honest and publishable: an entry names the rule that changed and the *class* of evidence behind it, never the private task that surfaced it; and repository-specific facts never appear here, because they belong in an adapter, which is not part of this repository.
 
+## 2026-10-10
+
+- **Review-loop culls comments once more before the PR opens.** Build's comment cull runs before handoff, but the diff audit and verify's repair rounds both write code after it, so their comments reached reviewers unaudited. The pass now repeats as the first step of publishing, ahead of the single-commit fold so its cuts land in that commit: remove every comment a future agent does not need to derive non-obvious context, and shorten each survivor without losing its purpose. Two guards keep it from doing harm. Its scope is the PR's own comments plus any in touched code the change made stale, because sweeping unrelated pre-existing comments is scope drift. Directives — linter disables, magic comments, generated annotations — are exempt, because they are code that happens to start with a comment marker. Directed by the system's owner rather than graduated from a lesson.
+
 ## 2026-09-30
 
 - **Deviation classes (owner-approved — touches user-routed controls): a change to what a frozen criterion accepts, or work the plan left out, is always `plan-error` and always reaches the user**, never resolved by a spawner and never logged `mechanical`. The escalation opens with a plain catch-up that assumes no memory of the plan. Evidence: a verify FAIL on deviations that widened frozen criteria while logged as mechanical, plus two plan omissions logged the same way.
