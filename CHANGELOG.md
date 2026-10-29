@@ -4,6 +4,10 @@ Engine changes only — what changed in the process, and what motivated it. Newe
 
 Two rules keep this file honest and publishable: an entry names the rule that changed and the *class* of evidence behind it, never the private task that surfaced it; and repository-specific facts never appear here, because they belong in an adapter, which is not part of this repository.
 
+## 2026-10-28
+
+- **Build names the branch for the change before the first commit.** Branches had been inheriting whatever started the work — a workspace placeholder, the planning or explainer session, a chat thread — so a reviewer reading the branch list saw names that described the conversation, not the diff. Build now probes the branch, renames it to say what the diff changes (area first, in the PR title's vocabulary), and records the result in the plan header. It never renames a branch that has an upstream or an open PR, because the forge keys the PR to that name; that mismatch is logged instead. Directed by the system's owner rather than graduated from a lesson.
+
 ## 2026-10-10
 
 - **Review-loop culls comments once more before the PR opens.** Build's comment cull runs before handoff, but the diff audit and verify's repair rounds both write code after it, so their comments reached reviewers unaudited. The pass now repeats as the first step of publishing, ahead of the single-commit fold so its cuts land in that commit: remove every comment a future agent does not need to derive non-obvious context, and shorten each survivor without losing its purpose. Two guards keep it from doing harm. Its scope is the PR's own comments plus any in touched code the change made stale, because sweeping unrelated pre-existing comments is scope drift. Directives — linter disables, magic comments, generated annotations — are exempt, because they are code that happens to start with a comment marker. Directed by the system's owner rather than graduated from a lesson.
