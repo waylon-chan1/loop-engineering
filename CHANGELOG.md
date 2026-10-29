@@ -11,6 +11,8 @@ Two rules keep this file honest and publishable: an entry names the rule that ch
 
 ## 2026-10-28
 
+- **Every task gets one work ticket, kept in step with the plan's status.** People outside the lifecycle couldn't see what was being built or where it stood without a plan store they can't reach. Build now opens a ticket in the team's issue tracker before the first commit, or adopts the existing one when someone already filed the work. Each later stage moves the ticket forward as the Status line advances: in progress, in review, the post-merge state, canceled. The PR links the ticket so the forge integration can move it at merge with no agent running. A ticket is only ever moved forward, never past what the Status implies, and never to "done", which means shipped and is a person's call. Nested lifecycles share their root's ticket. An unreachable tracker is logged and never blocks. A new `{work_tracker}` adapter key names the tracker, format, state mapping and link syntax. Directed by the system's owner rather than graduated from a lesson.
+
 - **Build names the branch for the change before the first commit.** Branches had been inheriting whatever started the work — a workspace placeholder, the planning or explainer session, a chat thread — so a reviewer reading the branch list saw names that described the conversation, not the diff. Build now probes the branch, renames it to say what the diff changes (area first, in the PR title's vocabulary), and records the result in the plan header. It never renames a branch that has an upstream or an open PR, because the forge keys the PR to that name; that mismatch is logged instead. Directed by the system's owner rather than graduated from a lesson.
 
 ## 2026-10-10

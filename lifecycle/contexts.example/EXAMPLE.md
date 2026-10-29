@@ -29,6 +29,7 @@ Resolution order (LIFECYCLE.md § The adapter):
 | `{comment_cull}` | A non-interactive command that runs the pre-PR comment cull as an agent from a different model family, with write access limited to the working tree, e.g. another vendor's coding CLI in exec mode with a workspace-write sandbox. It takes the cull prompt and edits files in place; review-loop checks its diff is comments-only before folding. Omit it and review-loop culls comments itself |
 | `{tracker_location}` | Where lesson rows live — a database, a checked-in CSV, anything queryable. Optional, never a dependency |
 | `{invariants}` | Facts no agent may re-derive wrong: money as integer cents, never log raw PII, every error response uses one envelope, seeds are idempotent |
+| `{work_tracker}` | e.g. Linear team `APP` via its connector. Format: plain-language outcome title; body says what changes and what done means. States: `building` → In Progress, `in-review` → In Review, `merged` → Done (or your post-merge state), `abandoned` → Canceled. Link: `Fixes APP-<n>` in the PR description. Omit the row for no ticket |
 | `{companion_repos}` | See below. Omit the section when the repo's behavior spans nothing |
 
 ## Companion repositories

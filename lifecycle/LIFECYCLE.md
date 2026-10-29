@@ -27,6 +27,7 @@ Section ownership and mutability:
 |---|---|---|
 | Header: `Generated:` / `Repo:` / `Branch:` / `Tier:` / `Status:` | plan creates; every skill updates Status only | Status is the one always-live line |
 | Header `PR:` — the pull request URL | review-loop, when it opens the PR | set once; it is how a later session or the sweep finds the PR to resolve state from |
+| Header `Ticket:` — the work ticket's id and URL | build, when it opens or adopts the ticket (§ The work ticket) | set once; nested lifecycles copy their root's |
 | `## Observations` — dated, stage-tagged facts (friction, surprises), one line each | any agent, any stage | append-only; facts never prescriptions |
 | `## How it works` — who experiences the feature, then one line per step of the flow | plan (Criteria Planning) | a reading aid, never the contract; revisable without a banner |
 | `## Problem`, `## Decisions` (numbered) | plan (Criteria Planning) | frozen; dated supersession banners only |
@@ -278,6 +279,17 @@ Every plan doc has an `## Observations` section any agent may append to, at any 
 
 Real work discovered mid-lifecycle goes to the repo's follow-up channel (`{followup_routing}`), filtered by the impact bar: **file it only if it drives real impact, fixes a real hole, or meaningfully improves user experience.** The test: *would the owner of that backlog thank you for this ticket, or archive it?* Hypotheticals, futureproofing, style preferences, and micro-refactors are not tickets. Dedupe against existing entries before creating one.
 
+## The work ticket
+
+Every task has one ticket in the team's issue tracker (`{work_tracker}`), so people outside the lifecycle can see what is being built and where it stands without a plan store they cannot reach. The plan document stays the contract; the ticket mirrors its status for humans.
+
+- **Build opens or adopts it before the first commit.** Search the tracker first, backlog and triage included: work someone asked for usually has a ticket already, and that ticket is adopted as it stands. Never rewrite another person's description; comment that the work has started instead. Only when nothing matches does build create one in `{work_tracker}`'s format. Either way, record it in the `Ticket:` header.
+- **Nested lifecycles share their root's ticket.** A companion-repo lifecycle or a review-round patch is part of the same piece of work, and a second ticket splits one status across two places.
+- **Written for a reader who never sees the plan.** The title names the outcome in plain words; the body says what changes and what done means in a few lines. No criteria numbers, plan-store paths, or private task names, and no user data.
+- **Status moves forward only, and only as far as the Status line implies.** Each skill that writes a mapped Status moves the ticket in the same step, using `{work_tracker}`'s mapping. A ticket already further along — moved by a person or by the forge integration — stays where it is. The final "done" state is a person's call: it usually means shipped, and agents never deploy.
+- **The PR links the ticket** in `{work_tracker}`'s link syntax, so the forge integration moves it when the PR merges, with no agent running.
+- **An unreachable tracker never blocks.** Log `ticket: unreachable` in `## Observations` and carry on; the next stage that reaches the tracker opens the ticket and catches its state up.
+
 ## How findings are reported
 
 Every report a skill hands back to a human — verdicts, failures, deviations, raised questions, retro lessons — is written in **plain English, short, and to the point.** The reader is scanning; make the point findable in seconds.
@@ -326,11 +338,12 @@ The four skills carry zero repository facts. Every repo-specific value is an **a
 | `{outside_voice}` | Command **per model family** that runs an adversarial reader, read-only and non-interactive, each pinned to an exact model version (§ The outside voice). No entry for a family → that family reads as a plain subagent, reported as such |
 | `{comment_cull}` | Command that runs review-loop's pre-PR comment cull as an agent from a **different model family**, pinned to an exact version, with write access scoped to the working tree. Absent → the review-loop agent runs the cull itself |
 | `{invariants}` | Facts that must never be re-derived wrong |
+| `{work_tracker}` | The team issue tracker that holds each task's ticket (§ The work ticket): team, ticket format, the Status → ticket-state mapping, and the PR link syntax its forge integration reads |
 | `{companion_repos}` | Repositories this one's behavior spans: local clone path, forge slug, the relationship (who produces, who consumes), and the usual deploy order |
 
 **Resolution order:** (1) `.claude/lifecycle-context.md` in the repo, if present; (2) `~/.claude/skills/lifecycle/contexts/<repo>.md`, where `<repo>` is the basename of `git remote get-url origin`; (3) neither → run the bootstrap: infer candidates from the repo (README, CI config, `bin/`, `package.json`/`Gemfile`, AGENTS.md/CLAUDE.md), confirm them with the user, write the context file to location (2) for next time.
 
-**Missing keys degrade, they don't block.** No `{mint_test_state}` means manual verification says so and uses `{manual_probe}` from a cold start; no `{ci_command}` means run `{test_command}` + `{lint_command}` separately; no `{diff_audit_skill}` means build's own cull stands as the audit; no `{review_skill}` means review-loop runs the post-PR stage on its generic rules alone, since that stage has its own skill and the key only supplements it; no `{outside_voice}` means the cold read still happens as a same-family subagent and every report that rests on it says so, because a cross-family review silently served by one family is a false claim of coverage. no `{comment_cull}` means review-loop culls comments itself. A skill never invents tooling a key doesn't name.
+**Missing keys degrade, they don't block.** No `{mint_test_state}` means manual verification says so and uses `{manual_probe}` from a cold start; no `{ci_command}` means run `{test_command}` + `{lint_command}` separately; no `{diff_audit_skill}` means build's own cull stands as the audit; no `{review_skill}` means review-loop runs the post-PR stage on its generic rules alone, since that stage has its own skill and the key only supplements it; no `{outside_voice}` means the cold read still happens as a same-family subagent and every report that rests on it says so, because a cross-family review silently served by one family is a false claim of coverage. no `{comment_cull}` means review-loop culls comments itself. No `{work_tracker}` means no ticket. A skill never invents tooling a key doesn't name.
 
 ## Lessons and the tracker
 
