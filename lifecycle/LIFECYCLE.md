@@ -27,7 +27,7 @@ Section ownership and mutability:
 |---|---|---|
 | Header: `Generated:` / `Repo:` / `Branch:` / `Tier:` / `Status:` | plan creates; every skill updates Status only | Status is the one always-live line |
 | Header `PR:` — the pull request URL | review-loop, when it opens the PR | set once; it is how a later session or the sweep finds the PR to resolve state from |
-| Header `Ticket:` — the work ticket's id and URL | build, when it opens or adopts the ticket (§ The work ticket) | set once; nested lifecycles copy their root's |
+| Header `Ticket:` — the work ticket's id and URL, or the gate-2 decision until build acts on it | plan-loop Build Planning proposes; build opens or adopts (§ The work ticket) | set once; nested lifecycles copy their root's |
 | `## Observations` — dated, stage-tagged facts (friction, surprises), one line each | any agent, any stage | append-only; facts never prescriptions |
 | `## How it works` — who experiences the feature, then one line per step of the flow | plan (Criteria Planning) | a reading aid, never the contract; revisable without a banner |
 | `## Problem`, `## Decisions` (numbered) | plan (Criteria Planning) | frozen; dated supersession banners only |
@@ -283,7 +283,12 @@ Real work discovered mid-lifecycle goes to the repo's follow-up channel (`{follo
 
 Every task has one ticket in the team's issue tracker (`{work_tracker}`), so people outside the lifecycle can see what is being built and where it stands without a plan store they cannot reach. The plan document stays the contract; the ticket mirrors its status for humans.
 
-- **Build opens or adopts it before the first commit.** Search the tracker first, backlog and triage included: work someone asked for usually has a ticket already, and that ticket is adopted as it stands. Never rewrite another person's description; comment that the work has started instead. Only when nothing matches does build create one in `{work_tracker}`'s format. Either way, record it in the `Ticket:` header.
+- **Build Planning finds the ticket; a person confirms it at gate 2; build opens it.** Duplicates come from searching too narrowly, so the search is wide:
+  - every state, including backlog, triage, and anything done or canceled in the last month;
+  - at least two phrasings of the outcome, plus every vendor, endpoint, PR and issue number the plan cites;
+  - the `Ticket:` headers of the other plan docs in the store.
+
+  Read each candidate rather than matching titles. Gate 2 presents one of three decisions: adopt a ticket, file a sub-issue under one, or create a new one, listing the candidates it rejected and why. Build carries out the decision before the first commit. It re-runs the search just before creating, since someone may have filed the work after the gate. An adopted ticket is never rewritten; build comments that the work has started. Record the result in the `Ticket:` header.
 - **Nested lifecycles share their root's ticket.** A companion-repo lifecycle or a review-round patch is part of the same piece of work, and a second ticket splits one status across two places.
 - **Written for a reader who never sees the plan.** The title names the outcome in plain words; the body says what changes and what done means in a few lines. No criteria numbers, plan-store paths, or private task names, and no user data.
 - **Status moves forward only, and only as far as the Status line implies.** Each skill that writes a mapped Status moves the ticket in the same step, using `{work_tracker}`'s mapping. A ticket already further along — moved by a person or by the forge integration — stays where it is. The final "done" state is a person's call: it usually means shipped, and agents never deploy.

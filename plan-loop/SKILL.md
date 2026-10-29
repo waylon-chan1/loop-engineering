@@ -81,6 +81,7 @@ Explore for reuse before designing anything new: existing operations, models, he
 - `## Companion repos` — only if the behavior genuinely spans repositories (`{companion_repos}` names the candidates). Per repo: which one, why it must change, the specific planned change, which criteria it serves, and the **deploy order** with what happens if only one side ships. Investigate those repos read-only while writing this — never assert what a client sends or a service returns without having looked. Omit the section entirely when the work is single-repo; inventing a companion change is the cross-repo form of overengineering, and it doubles the blast radius while doing it.
 - `## Failure Modes` — table: Failure | Handling | Test. This is the regression contract verify will hold.
 - `## Rollout` — only when deploy order, flags, or data changes make it non-trivial.
+- `Ticket:` header — when the adapter names `{work_tracker}`, search for the work's ticket and write the decision (adopt, sub-issue under, or create) with the rejected candidates, per LIFECYCLE.md § The work ticket. A nested lifecycle copies its root's.
 
 ### 2c. Traceability check — both directions
 
@@ -100,7 +101,7 @@ Before presenting gate 2, run the outside voice over the plan document per LIFEC
 
 ### 2d. Gate 2
 
-Present shape + build list to your approver, and **present `## Data model` explicitly when it exists** — schema is the hardest part of the plan to undo after it ships, so it gets named at the gate rather than left for the approver to find. Root: **stop — end the turn.** Nested: hand them to the parent and continue when it approves. On approval: Status `plan-approved`, commit in the plan store.
+Present shape + build list and the ticket decision to your approver, and **present `## Data model` explicitly when it exists** — schema is the hardest part of the plan to undo after it ships, so it gets named at the gate rather than left for the approver to find. Root: **stop — end the turn.** Nested: hand them to the parent and continue when it approves. On approval: Status `plan-approved`, commit in the plan store.
 
 ### 2e. Handoff (unless invoked `no-chain`)
 
