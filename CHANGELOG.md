@@ -4,6 +4,11 @@ Engine changes only — what changed in the process, and what motivated it. Newe
 
 Two rules keep this file honest and publishable: an entry names the rule that changed and the *class* of evidence behind it, never the private task that surfaced it; and repository-specific facts never appear here, because they belong in an adapter, which is not part of this repository.
 
+## 2026-10-29
+
+- **Build checks every behavior sentence it writes against each branch of the code.** Docs and API doc comments a diff wrote kept describing the main path only: an error response said to carry fields it doesn't, a repeat call said to answer one way when one case answers another. Reviewers found these one per round, each costing its own push. The rule had lived in one repository's adapter; a second repository confirmed it, so it moved into the build skill.
+- **An "unchanged" assertion first asserts the call did its work.** Specs pinning that a record stayed untouched kept passing when the code under test returned early, because an early exit also leaves everything untouched. The build skill's absence rule already asked for a positive control; it now names this case, which recurred after that rule landed in a third repository.
+
 ## 2026-10-28
 
 - **Build names the branch for the change before the first commit.** Branches had been inheriting whatever started the work — a workspace placeholder, the planning or explainer session, a chat thread — so a reviewer reading the branch list saw names that described the conversation, not the diff. Build now probes the branch, renames it to say what the diff changes (area first, in the PR title's vocabulary), and records the result in the plan header. It never renames a branch that has an upstream or an open PR, because the forge keys the PR to that name; that mismatch is logged instead. Directed by the system's owner rather than graduated from a lesson.
