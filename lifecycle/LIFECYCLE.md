@@ -330,7 +330,7 @@ The four skills carry zero repository facts. Every repo-specific value is an **a
 | `{test_command}` / `{test_focus_command}` | Full suite; single file/example |
 | `{lint_command}` | Linter over changed files |
 | `{ci_command}` | The local everything-gate if one exists |
-| `{cloud_ci}` | The forge's CI that runs the full suite on every push, and how to wait on its result. When present, nobody runs the full suite locally: build and verify run focused specs and lint, review-loop opens the PR as a draft and marks it ready once cloud CI is green |
+| `{cloud_ci}` | The forge's CI that runs the full suite on every push, and how to wait on its result. When present, nobody runs the full suite locally: build and verify run focused specs and lint, and review-loop reads cloud CI alongside the review bots and fixes a red within that round |
 | `{run_server}` | Boot the app locally |
 | `{workspace_bootstrap}` | One-time setup a fresh worktree/clone needs |
 | `{mint_test_state}` | Tooling to put the system into a named state for manual verification |

@@ -6,6 +6,8 @@ Two rules keep this file honest and publishable: an entry names the rule that ch
 
 ## 2026-10-30
 
+- **The PR opens ready for review, not as a draft.** Holding it in draft until cloud CI went green delayed review by a full CI run on every task to protect against a red that, on the record, almost never comes from the diff. Cloud CI now runs alongside the review bots, and a red is adjudicated with that round's findings and fixed in the same push. Directed by the system's owner.
+
 - **The full suite runs in cloud CI, not locally, when the repo has one.** Build and verify each ran the local everything-gate, so a task paid for it once per build and once per verify round. Across 64 recorded runs it took a median of over three minutes and caught no failure the diff caused: every red came from the environment. Build and verify now run the plan's focused specs and lint over changed files. Review-loop opens the PR as a draft, waits for cloud CI, fixes any red into the single commit, and marks the PR ready only when it's green. Review bots skip drafts, so a red costs no review round. Verify records full-suite regression as owed to cloud CI, not as passed. A new `{cloud_ci}` adapter key turns this on; without it, nothing changes. Directed by the system's owner rather than graduated from a lesson.
 
 ## 2026-10-29
