@@ -37,7 +37,7 @@ Task by task, in build-list order:
 2. Run the task's `Verify:` command until green; run `{lint_command}` over what changed.
 3. Check the task's box in the plan doc with its verdict: **DONE / DEVIATED-DONE / BLOCKED**.
 
-After the last task: run `{regen_artifacts}` for any behavior change, then `{ci_command}` (or `{test_command}` + `{lint_command}`). Red anything → fix before proceeding; build never hands a red tree forward.
+After the last task: run `{regen_artifacts}` for any behavior change, then every task's `Verify:` command again and `{lint_command}` over the changed files. The full suite is `{cloud_ci}`'s job after the PR opens; only a repo without `{cloud_ci}` runs `{ci_command}` (or `{test_command}`) here. Red anything → fix before proceeding; build never hands a red tree forward.
 
 **Every behavior sentence the diff writes is a claim about code.** For each sentence the diff adds or rewrites in a doc, README, or API doc comment that says what the code returns or does, name the branch it describes and check it against every other outcome and early return of that code: the error responses, the empty case, the variant that carries no field. A sentence true of the main path overclaims on the rest, and reviewers find these one per round.
 

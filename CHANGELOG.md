@@ -4,6 +4,10 @@ Engine changes only — what changed in the process, and what motivated it. Newe
 
 Two rules keep this file honest and publishable: an entry names the rule that changed and the *class* of evidence behind it, never the private task that surfaced it; and repository-specific facts never appear here, because they belong in an adapter, which is not part of this repository.
 
+## 2026-10-30
+
+- **The full suite runs in cloud CI, not locally, when the repo has one.** Build and verify each ran the local everything-gate, so a task paid for it once per build and once per verify round. Across 64 recorded runs it took a median of over three minutes and caught no failure the diff caused: every red came from the environment. Build and verify now run the plan's focused specs and lint over changed files. Review-loop opens the PR as a draft, waits for cloud CI, fixes any red into the single commit, and marks the PR ready only when it's green. Review bots skip drafts, so a red costs no review round. Verify records full-suite regression as owed to cloud CI, not as passed. A new `{cloud_ci}` adapter key turns this on; without it, nothing changes. Directed by the system's owner rather than graduated from a lesson.
+
 ## 2026-10-29
 
 - **The work ticket is found at Build Planning and confirmed at gate 2, so duplicates don't get filed.** A one-line "search first" left the search to a single query, which misses a ticket phrased differently from the plan. Build Planning now searches every state, including recently done or canceled. It uses at least two phrasings plus every vendor, endpoint, PR and issue number the plan cites, and checks the other plans' tickets. It reads each candidate instead of matching titles. Gate 2 shows the decision — adopt, sub-issue, or create — with the rejected candidates, so a person confirms the match. Build carries out that decision and re-searches just before creating. Directed by the system's owner rather than graduated from a lesson.

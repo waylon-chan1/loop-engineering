@@ -330,6 +330,7 @@ The four skills carry zero repository facts. Every repo-specific value is an **a
 | `{test_command}` / `{test_focus_command}` | Full suite; single file/example |
 | `{lint_command}` | Linter over changed files |
 | `{ci_command}` | The local everything-gate if one exists |
+| `{cloud_ci}` | The forge's CI that runs the full suite on every push, and how to wait on its result. When present, nobody runs the full suite locally: build and verify run focused specs and lint, review-loop opens the PR as a draft and marks it ready once cloud CI is green |
 | `{run_server}` | Boot the app locally |
 | `{workspace_bootstrap}` | One-time setup a fresh worktree/clone needs |
 | `{mint_test_state}` | Tooling to put the system into a named state for manual verification |
@@ -348,7 +349,7 @@ The four skills carry zero repository facts. Every repo-specific value is an **a
 
 **Resolution order:** (1) `.claude/lifecycle-context.md` in the repo, if present; (2) `~/.claude/skills/lifecycle/contexts/<repo>.md`, where `<repo>` is the basename of `git remote get-url origin`; (3) neither → run the bootstrap: infer candidates from the repo (README, CI config, `bin/`, `package.json`/`Gemfile`, AGENTS.md/CLAUDE.md), confirm them with the user, write the context file to location (2) for next time.
 
-**Missing keys degrade, they don't block.** No `{mint_test_state}` means manual verification says so and uses `{manual_probe}` from a cold start; no `{ci_command}` means run `{test_command}` + `{lint_command}` separately; no `{diff_audit_skill}` means build's own cull stands as the audit; no `{review_skill}` means review-loop runs the post-PR stage on its generic rules alone, since that stage has its own skill and the key only supplements it; no `{outside_voice}` means the cold read still happens as a same-family subagent and every report that rests on it says so, because a cross-family review silently served by one family is a false claim of coverage. no `{comment_cull}` means review-loop culls comments itself. No `{work_tracker}` means no ticket. A skill never invents tooling a key doesn't name.
+**Missing keys degrade, they don't block.** No `{mint_test_state}` means manual verification says so and uses `{manual_probe}` from a cold start; no `{ci_command}` means run `{test_command}` + `{lint_command}` separately; no `{cloud_ci}` means build and verify run the full suite locally; no `{diff_audit_skill}` means build's own cull stands as the audit; no `{review_skill}` means review-loop runs the post-PR stage on its generic rules alone, since that stage has its own skill and the key only supplements it; no `{outside_voice}` means the cold read still happens as a same-family subagent and every report that rests on it says so, because a cross-family review silently served by one family is a false claim of coverage. no `{comment_cull}` means review-loop culls comments itself. No `{work_tracker}` means no ticket. A skill never invents tooling a key doesn't name.
 
 ## Lessons and the tracker
 

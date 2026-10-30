@@ -24,7 +24,7 @@ Diff the `## Acceptance criteria` section against its state at the gate-1 approv
 
 ## 2. Adjudicate, criterion by criterion, in order
 
-- **`[spec]`** — run the relevant `Verify:` commands yourself, then the full `{ci_command}` (or `{test_command}` + `{lint_command}`). Never accept a claim of green. For the core criterion, run a **mutation check**: stub or revert the key behavior change and confirm its spec goes red — a spec that can't fail guards nothing.
+- **`[spec]`** — run the relevant `Verify:` commands yourself and `{lint_command}` over the changed files. With `{cloud_ci}`, the full suite's verdict comes from it once the PR is open: record full-suite regression as owed to cloud CI, not as passed. Without it, run the full `{ci_command}` (or `{test_command}`) here. Never accept a claim of green. For the core criterion, run a **mutation check**: stub or revert the key behavior change and confirm its spec goes red — a spec that can't fail guards nothing.
 - **`[manual]`** — boot `{run_server}`; put the system into the needed state with `{mint_test_state}` (cold start via `{manual_probe}` if the repo has no minting tool); exercise the flow through `{manual_probe}`; observe the criterion with your own eyes. Record the exact requests/commands and observed responses into `## Verification evidence` — reproducible, so a skeptic can replay them.
 - **`[user]`** — verdict is **USER** with the specific question the human must answer (what to look at, what "good" looks like). Never PASS on the human's behalf; a green-looking report with a human-owed item buried in it is this skill's canonical failure.
 
@@ -32,7 +32,7 @@ Diff the `## Acceptance criteria` section against its state at the gate-1 approv
 
 **Probe at the boundary your code owns.** To show that our code survives a dependency's failure, find where that dependency's own guarantees *end* — by reading its source — and inject there. A mock placed by guesswork tests the guess: mutating a library's internals usually proves only that the library handles its own errors, which is never what the criterion asked. When a criterion says "X still works when Y fails", the probe belongs at our call site, and the strongest version needs no stubbing at all.
 
-**Regression:** the full suite already ran above; additionally spot-check the plan's `## Failure Modes` table — each row's Test must exist and pass — and probe the nearest untouched behavior adjacent to the change.
+**Regression:** the full suite ran above, or is owed to `{cloud_ci}`; additionally spot-check the plan's `## Failure Modes` table — each row's Test must exist and pass — and probe the nearest untouched behavior adjacent to the change.
 
 ## 2b. Scope-drift check
 
